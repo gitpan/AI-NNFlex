@@ -145,7 +145,7 @@ another decimal point.
 
 
 VERSION
-0.15
+0.16
 
 ACKNOWLEDGEMENTS
 Phil Brierley, for making his excellent example code

@@ -1,3 +1,18 @@
+0.16
+20050218
+
+Changed the way weights are identified from a hash (keyed on
+stringified node object ref) to an array. Cleaner that way,
+and makes it easier to turn the weights into a matrix for
+compatibility with the upcoming PDL based modules.
+
+Altered the syntax for calls to load_state and dump_state,
+to get rid of the nasty hashref thing.
+
+Cleaned up a bit of debugging in ::init
+
+
+###############################################################
 0.15
 20050206
 

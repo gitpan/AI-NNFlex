@@ -42,6 +42,10 @@ use vars qw ($VERSION);
 #					calling dbug unless scalar debug > 0
 #					in a lot of calls
 #
+# 0.16 20050218		CColbourn	Changed from a hash of weights to an
+# 					array of weights, to make it easier
+# 					to adapt the code to PDL
+#
 ###############################################################################
 # ToDo
 # ====
@@ -64,7 +68,7 @@ use vars qw ($VERSION);
 # Clean up the perldocs
 #
 ###############################################################################
-$VERSION = "0.15";
+$VERSION = "0.16";
 
 
 ###############################################################################
@@ -117,6 +121,10 @@ AI::NNFlex - A customisable neural network simulator
  }
 
  $network->lesion({'nodes'=>PROBABILITY,'connections'=>PROBABILITY});
+
+ $network->dump_state(filename=>'badgers.wts');
+
+ $network->load_state(filename=>'badgers.wts');
 
  my $outputsRef = $dataset->run($network);
 
@@ -308,7 +316,7 @@ AI::NNFlex - A customisable neural network simulator
  v0.14 fixes momentum and backprop so they are no longer nailed to tanh hidden
   units only.
  v0.15 fixes a bug in feedforward, and reduces the debug overhead
-  
+ v0.16 changes some underlying addressing of weights, to simplify and speed  
 
 =head1 COPYRIGHT
 
@@ -683,9 +691,9 @@ sub init
 								$weight = 0;
 							}
 							push @{$node->{'connectedNodesWest'}->{'nodes'}},$westNodes;
-							${$node->{'connectedNodesWest'}->{'weights'}}{$westNodes} = $weight;
+							push @{$node->{'connectedNodesWest'}->{'weights'}},$weight;
 							if (scalar @debug > 0)	
-							{$network->dbug ("West to east Connection - $westNodes to $node",2);}
+							{$network->dbug ("West to east Connection - ".$westNodes->{'nodeid'}." to ".$node->{'nodeid'},2);}
 						}
 					}
 				}
@@ -708,9 +716,9 @@ sub init
 						$weight = 0;
 					}
 					push @{$node->{'connectedNodesEast'}->{'nodes'}},$eastNodes;
-					${$node->{'connectedNodesEast'}->{'weights'}}{$eastNodes} = $weight;
+					push @{$node->{'connectedNodesEast'}->{'weights'}}, $weight;
 					if (scalar @debug > 0)
-					{$network->dbug ("East to west Connection $node to $eastNodes",2);}
+					{$network->dbug ("East to west Connection ".$node->{'nodeid'}." to ".$eastNodes->{'nodeid'},2);}
 				}
 			}
 			}
@@ -737,9 +745,9 @@ sub init
 				{
 					$weight = 0;
 				}
-				${$node->{'connectedNodesWest'}->{'weights'}}{$network->{'biasNode'}} = $weight;
+				push @{$node->{'connectedNodesWest'}->{'weights'}},$weight;
 				if (scalar @debug > 0)
-				{$network->dbug ("West to east Connection - ".$network->{'biasNode'}." to $node weight = $weight",2);}
+				{$network->dbug ("West to east Connection - bias to ".$node->{'nodeid'}." weight = $weight",2);}
 			}
 		}
 	}
@@ -821,12 +829,12 @@ sub dbug
 sub dump_state
 {
 	my $network = shift;
-	my $params =shift;
+	my %params =@_;
 	# This needs rewriting. It should include all connection weights, e->w & w->e
 
 
-	my $filename = $$params{'filename'};
-	my $activations = $$params{'activations'};
+	my $filename = $params{'filename'};
+	my $activations = $params{'activations'};
 
 	
 	open (OFILE,">$filename") or return "Can't create weights file $filename";
@@ -840,18 +848,21 @@ sub dump_state
 			{
 				print OFILE $node->{'nodeid'}." activation = ".$node->{'activation'}."\n";
 			}
+			my $connectedNodeCounter=0;
 			foreach my $connectedNode (@{$node->{'connectedNodesEast'}->{'nodes'}})
 			{
-				my $weight = ${$node->{'connectedNodesEast'}->{'weights'}}{$connectedNode};
+				my $weight = ${$node->{'connectedNodesEast'}->{'weights'}}[$connectedNodeCounter];
 				print OFILE $node->{'nodeid'}." <- ".$connectedNode->{'nodeid'}." = ".$weight."\n";
+				$connectedNodeCounter++;
 			}
 
 			if ($node->{'connectedNodesWest'})
 			{
+				my $connectedNodeCounter=0;
 				foreach my $connectedNode (@{$node->{'connectedNodesWest'}->{'nodes'}})
 				{
 					#FIXME - a more easily read format would be connectedNode first in the file
-					my $weight = ${$node->{'connectedNodesWest'}->{'weights'}}{$connectedNode};
+					my $weight = ${$node->{'connectedNodesWest'}->{'weights'}}[$connectedNodeCounter];
 					print OFILE $node->{'nodeid'}." -> ".$connectedNode->{'nodeid'}." = ".$weight."\n";
 				}
 			}
@@ -886,7 +897,10 @@ sub dump_state
 sub load_state
 {
 	my $network = shift;
-	my $filename = shift;
+
+	my %config = @_;
+
+	my $filename = $config{'filename'};
 
 	open (IFILE,$filename) or return "Error: unable to open $filename because $!";
 
@@ -922,7 +936,7 @@ sub load_state
 			$destNode = $2;
 			$weight = $3;
 			$network->dbug("Loading $nodeid -> $destNode = $weight",2);
-			$stateFromFile{$nodeid}->{'connectedNodesWest'}->{'weights'}->{$nodeMap{$destNode}}=$weight;
+			push @{$stateFromFile{$nodeid}->{'connectedNodesWest'}->{'weights'}},$weight;
 			push @{$stateFromFile{$nodeid}->{'connectedNodesWest'}->{'nodes'}},$nodeMap{$destNode};
 		}	
 		elsif ($_ =~ /(.*) <- (.*) = (.*)/)
@@ -930,7 +944,7 @@ sub load_state
 			$nodeid = $1;
 			$destNode = $2;
 			$weight = $3;
-			$stateFromFile{$nodeid}->{'connectedNodesEast'}->{'weights'}->{$nodeMap{$destNode}}=$weight;
+			push @{$stateFromFile{$nodeid}->{'connectedNodesEast'}->{'weights'}},$weight;
 			push @{$stateFromFile{$nodeid}->{'connectedNodesEast'}->{'nodes'}},$nodeMap{$destNode};
 			$network->dbug("Loading $nodeid <- $destNode = $weight",2);
 		}	

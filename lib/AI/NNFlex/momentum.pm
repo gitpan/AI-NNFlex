@@ -11,6 +11,10 @@
 #					function slope instead
 #					of hardcoded 1-y*y
 #
+# 1.2	20050218	CColbourn	Mod'd to change weight
+#					indexing to array for
+#					nnflex 0.16
+#
 ##########################################################
 # ToDo
 # ----
@@ -185,23 +189,25 @@ sub hiddenToOutput
 
 	foreach my $node (@$outputLayer)
 	{
+		my $connectedNodeCounter=0;
 		foreach my $connectedNode (@{$node->{'connectedNodesWest'}->{'nodes'}})
 		{
 			my $momentum = 0;
-			if ($node->{'connectedNodesWest'}->{'lastdelta'}->{$connectedNode})
+			if ($node->{'connectedNodesWest'}->{'lastdelta'}->[$connectedNodeCounter])
 			{
-				$momentum = ($network->{'momentum'})*($node->{'connectedNodesWest'}->{'lastdelta'}->{$connectedNode});
+				$momentum = ($network->{'momentum'})*($node->{'connectedNodesWest'}->{'lastdelta'}->[$connectedNodeCounter]);
 			}
 			if (scalar @debug > 0)
 			{$network->dbug("Learning rate is ".$network->{'learningrate'},4);}
 			my $deltaW = (($network->{'learningrate'}) * ($node->{'error'}) * ($connectedNode->{'activation'}));
 			$deltaW = $deltaW+$momentum;
-			$node->{'connectedNodesWest'}->{'lastdelta'}->{$connectedNode} = $deltaW;
+			$node->{'connectedNodesWest'}->{'lastdelta'}->[$connectedNodeCounter] = $deltaW;
 			
 			if (scalar @debug > 0)
 			{$network->dbug("Applying delta $deltaW on hiddenToOutput $connectedNode to $node",4);}
 			# 
-			$node->{'connectedNodesWest'}->{'weights'}->{$connectedNode} -= $deltaW;
+			$node->{'connectedNodesWest'}->{'weights'}->[$connectedNodeCounter] -= $deltaW;
+			$connectedNodeCounter++;
 		}
 			
 	}
@@ -248,12 +254,14 @@ sub hiddenOrInputToHidden
 	{
 		foreach my $node (@{$layer->{'nodes'}})
 		{
+			my $connectedNodeCounter=0;
 			if (!$node->{'connectedNodesWest'}) {last}
 
 			my $nodeError;
 			foreach my $connectedNode (@{$node->{'connectedNodesEast'}->{'nodes'}})
 			{
-				$nodeError += ($connectedNode->{'error'}) * ($connectedNode->{'connectedNodesWest'}->{'weights'}->{$node});
+				$nodeError += ($connectedNode->{'error'}) * ($connectedNode->{'connectedNodesWest'}->{'weights'}->[$connectedNodeCounter]);
+				$connectedNodeCounter++;
 			}
 			if (scalar @debug > 0)
 			{$network->dbug("Hidden node $node error = $nodeError",4);}
@@ -261,6 +269,7 @@ sub hiddenOrInputToHidden
 
 
 			# update the weights from nodes inputting to here
+			$connectedNodeCounter=0;
 			foreach my $westNodes (@{$node->{'connectedNodesWest'}->{'nodes'}})
 			{
 				
@@ -286,9 +295,11 @@ sub hiddenOrInputToHidden
 
 				$node->{'connectedNodesWest'}->{'lastdelta'}->{$westNodes} = $dW;
 
-				$node->{'connectedNodesWest'}->{'weights'}->{$westNodes} -= $dW;
+				$node->{'connectedNodesWest'}->{'weights'}->[$connectedNodeCounter] -= $dW;
 				if (scalar @debug > 0)
-				{$network->dbug("Weight now ".$node->{'connectedNodesWest'}->{'weights'}->{$westNodes},4);}
+				{$network->dbug("Weight now ".$node->{'connectedNodesWest'}->{'weights'}->[$connectedNodeCounter],4);}
+				$connectedNodeCounter++;
+
 			}	
 
 

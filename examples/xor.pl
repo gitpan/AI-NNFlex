@@ -52,7 +52,7 @@ my $dataset = AI::NNFlex::Dataset->new([
 
 my $counter=0;
 my $err = 10;
-while ($err >.01)
+while ($err >.001)
 {
 	$err = $dataset->learn($network);
 

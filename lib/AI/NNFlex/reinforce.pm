@@ -15,6 +15,10 @@
 # 1.1	20050116	CColbourn	Fixed reverse @layers
 #					bug reported by GM Passos
 #
+# 1.2	20050218	CColbourn	Mod'd to change weight
+#					addressing from hash to
+#					array for nnf0.16
+#
 ##########################################################
 # ToDo
 # ----
@@ -88,11 +92,12 @@ sub learn
 		foreach my $node (@nodes)
 		{
 			my @westNodes = @{$node->{'connectedNodesWest'}->{'nodes'}};
-			my %westWeights = %{$node->{'connectedNodesWest'}->{'weights'}};
+			my @westWeights = @{$node->{'connectedNodesWest'}->{'weights'}};
+			my $connectedNodeCounter=0;
 			foreach my $westNode (@westNodes)
 			{
-				my $dW = $westNode->{'activation'} * $westWeights{$westNode} * $network->{'learning rate'};
-				$node->{'connectedNodesWest'}->{'weights'}->{$westNode} += $dW;
+				my $dW = $westNode->{'activation'} * $westWeights[$connectedNodeCounter] * $network->{'learning rate'};
+				$node->{'connectedNodesWest'}->{'weights'}->[$connectedNodeCounter] += $dW;
 			}
 		}
 	}

@@ -20,6 +20,10 @@
 #					input to a node
 #					instead of total
 #
+# 1.3	20050218	CColbourn	Changed to reflect
+#					new weight indexing
+#					(arrays) in nnflex 0.16
+#
 ##########################################################
 # ToDo
 # ----
@@ -146,13 +150,13 @@ sub run
 			# Decay the node (note that if decay is not set this
 			# will have no effect, hence no if).
 			$node->{'activation'} -= $node->{'decay'};
-
+			my $nodeCounter=0;
 			foreach my $connectedNode (@{$node->{'connectedNodesWest'}->{'nodes'}})
 			{
 				if (scalar @debug> 0)
 				{$network->dbug("Flowing from $connectedNode to $node",3);}
 	
-				my $weight = ${$node->{'connectedNodesWest'}->{'weights'}}{$connectedNode};
+				my $weight = ${$node->{'connectedNodesWest'}->{'weights'}}[$nodeCounter];
 				my $activation = $connectedNode->{'activation'};		
 				if (scalar @debug> 0)
 				{$network->dbug("Weight & activation: $weight - $activation",3);}
@@ -160,7 +164,7 @@ sub run
 
 				my $totalActivation = $weight*$activation;
 				$node->{'activation'} +=$totalActivation; 
-	
+				$nodeCounter++;	
 			}
 
 			if ($node->{'active'})

@@ -178,6 +178,7 @@ sub hiddenToOutput
 
 	foreach my $node (@$outputLayer)
 	{
+		my $connectedNodeCounter=0;
 		foreach my $connectedNode (@{$node->{'connectedNodesWest'}->{'nodes'}})
 		{
 			if (scalar @debug > 0)
@@ -186,8 +187,8 @@ sub hiddenToOutput
 			if (scalar @debug > 0)
 			{$network->dbug("Applying delta $deltaW on hiddenToOutput $connectedNode to $node",4);}
 			# 
-			$node->{'connectedNodesWest'}->{'weights'}->{$connectedNode} -= $deltaW;
-				
+			$node->{'connectedNodesWest'}->{'weights'}->[$connectedNodeCounter] -= $deltaW;
+			$connectedNodeCounter++;	
 		}
 	}
 }
@@ -236,9 +237,10 @@ sub hiddenOrInputToHidden
 			if (!$node->{'connectedNodesWest'}) {last}
 
 			my $nodeError;
+			my $connectedNodeCounter=0;
 			foreach my $connectedNode (@{$node->{'connectedNodesEast'}->{'nodes'}})
 			{
-				$nodeError += ($connectedNode->{'error'}) * ($connectedNode->{'connectedNodesWest'}->{'weights'}->{$node});
+				$nodeError += ($connectedNode->{'error'}) * ($connectedNode->{'connectedNodesWest'}->{'weights'}[$connectedNodeCounter]);
 			}
 			if (scalar @debug > 0)
 			{$network->dbug("Hidden node $node error = $nodeError",4);}
@@ -246,6 +248,7 @@ sub hiddenOrInputToHidden
 
 
 			# update the weights from nodes inputting to here
+			my $connectedNodeCounter=0;
 			foreach my $westNodes (@{$node->{'connectedNodesWest'}->{'nodes'}})
 			{
 				# get the slope from the activation function component
@@ -259,9 +262,10 @@ sub hiddenOrInputToHidden
 				my $dW = $value;
 				if (scalar @debug > 0)
 				{$network->dbug("Applying deltaW $dW to inputToHidden connection from $westNodes to $node",4);}
-				$node->{'connectedNodesWest'}->{'weights'}->{$westNodes} -= $dW;
+				$node->{'connectedNodesWest'}->{'weights'}->[$connectedNodeCounter] -= $dW;
+				$connectedNodeCounter++;
 				if (scalar @debug > 0)
-				{$network->dbug("Weight now ".$node->{'connectedNodesWest'}->{'weights'}->{$westNodes},4);}
+				{$network->dbug("Weight now ".$node->{'connectedNodesWest'}->{'weights'}->[$connectedNodeCounter],4);}
 			}	
 
 

@@ -1,0 +1,4 @@
+Bug in feedforward, looks like activation of a sort
+gets applied, whether the node is active or not.
+
+Should bias node apply to inputs? Will try without.
