@@ -169,7 +169,7 @@ sub run
 
 
 
-
+	return $network->output;
 
 }
 

@@ -1,3 +1,32 @@
+0.22
+XXXXXXXXX
+
+implemented node & layer connect methods, to allow recurrent
+connections.
+
+put sigmoid_slope function in mathlib, courtesy of frodo72
+@ perlmonks
+
+Implemented functions to save & load snns .pat files in Dataset
+
+Altered Dataset constructor to allow an empty param set - you
+can now construct a null Dataset & add items to it using the
+$dataset->add([[0,1],[1]) method (also implemented in this 
+version.
+
+Altered feedforward run method to return output pattern - more
+intuitive that way.
+
+There may be traces of hopfield here and there. Its WIP, but
+I pulled it from this release, as I was having trouble getting
+it to work but wanted to get the various fixes released.
+
+Implemented dataset->delete method.
+
+Put the pod documentation back in Dataset.pm :-)
+
+
+###############################################################
 0.21
 20050313
 

@@ -4,7 +4,7 @@ use AI::NNFlex::Backprop;
 use AI::NNFlex::Dataset;
 
 BEGIN{
-	plan tests=>8}
+	plan tests=>10}
 
 # test create network
 my $network = AI::NNFlex::Backprop->new(randomconnections=>0,
@@ -33,7 +33,7 @@ $result = $network->add_layer(	nodes=>2,
 			decay=>0.0,
 			randomactivation=>0,
 			threshold=>0.0,
-			activationfunction=>"tanh",
+			activationfunction=>"sigmoid",
 			randomweights=>1);
 
 
@@ -76,4 +76,12 @@ ok($err); #test 5
 $result = $dataset->run($network);
 ok($result); #test 8
 ##
+
+# test saving weights
+$result = $network->dump_state(filename=>'state.wts',activations=>1);
+ok($result);
+
+# test loading weights
+$result = $network->load_state(filename=>'state.wts');
+ok($result);
 

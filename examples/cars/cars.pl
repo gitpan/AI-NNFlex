@@ -141,6 +141,7 @@ $network->add_layer(	nodes=>2,
 
 $network->init();
 
+$network->connect(fromlayer=>2,tolayer=>2);
 
 my $counter=0;
 my $err = 10;

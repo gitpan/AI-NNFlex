@@ -10,6 +10,10 @@
 # 1.0 	CColbourn	20050315	Compiled into a
 #					single module
 #
+# 1.1	CColbourn	20050321	added in sigmoid_slope
+#
+# 1.2	CColbourn	20050330	Added in hopfield_threshold
+#
 #######################################################
 #Copyright (c) 2004-2005 Charles Colbourn. All rights reserved. This program is free software; you can redistribute it and/or modify
 
@@ -95,6 +99,35 @@ sub sigmoid
 	return $value;
 }
 
+sub sigmoid_slope
+{
+	my $network = shift;
+	my $value = shift;
+	my @debug = @{$network->{'debug'}};
+
+
+	my $return = exp(-$value) * ((1 + exp(-$value)) ** -2);
+	if (scalar @debug > 0)
+	{$network->dbug("sigmoid_slope returning $value",5);}
+
+	return $return;
+}
+
+############################################################
+# hopfield_threshold
+# standard hopfield threshold activation - doesn't need a 
+# slope (because hopfield networks don't use them!)
+############################################################
+sub hopfield_threshold
+{
+	my $network = shift;
+	my $value = shift;
+
+	if ($value <0){return -1}
+	if ($value >0){return 1}
+	return $value;
+}
+
 ############################################################
 # atanh error function
 ############################################################
@@ -102,7 +135,7 @@ sub atanh
 {
 	my $network = shift;
 	my $value = shift;
-	if ($value >-1 && $value <1)
+	if ($value >-0.5 && $value <0.5)
 	{
 		$value = log((1+$value)/(1-$value))/2;
 	}
@@ -131,6 +164,9 @@ tanh
 =item *
 linear
 
+=item *
+hopfield_threshold
+
 =back
 
 Error functions
@@ -142,11 +178,13 @@ atanh
 
 =back
 
-If you want to implement your own activation/error functions, you can add them to this module. All activation functions require an additional function <function name>_slope, which returns the 1st order derivative of the function.
+If you want to implement your own activation/error functions, you can add them to this module. All activation functions to be used by certain types of net (like Backprop) require an additional function <function name>_slope, which returns the 1st order derivative of the function.
 
+This rule doesn't apply to all network types. Hopfield for example requires no slope calculation.
 
 =head1 CHANGES
 
+v1.2 includes hopfield_threshold
 
 =head1 COPYRIGHT
 

@@ -306,7 +306,7 @@ AI::NNFlex::Backprop - a fast, pure perl backprop Neural Net simulator
 
  use AI::NNFlex::Backprop;
 
- my $network = AI::NNFlex::backprop->new(config parameter=>value);
+ my $network = AI::NNFlex::Backprop->new(config parameter=>value);
 
  $network->add_layer(nodes=>x,activationfunction=>'function');
 
@@ -375,11 +375,17 @@ Parameters:
 
 
 The following parameters are optional:
+
  randomweights
+
  fixedweights
+
  debug
+
  round
+
  momentum
+
  fahlmanconstant
 
 
@@ -394,11 +400,11 @@ The Fahlman constant modifies the slope of the error curve. 0.1 is the standard 
  new (	[[INPUT VALUES],[OUTPUT VALUES],
 	[INPUT VALUES],[OUTPUT VALUES],..])
 
-=head3 INPUT VALUES
+=head2 INPUT VALUES
 
 These should be comma separated values. They can be applied to the network with ::run or ::learn
 
-=head3 OUTPUT VALUES
+=head2 OUTPUT VALUES
 	
 These are the intended or target output values. Comma separated. These will be used by ::learn
 
@@ -407,9 +413,9 @@ These are the intended or target output values. Comma separated. These will be u
 
 This is a short list of the main methods implemented in AI::NNFlex::Backprop.
 
-=head2 AI::NNFlex
+=head2 AI::NNFlex::Backprop
 
-=head3 add_layer
+=head2 add_layer
 
  Syntax:
 
@@ -427,8 +433,23 @@ The activation function must be defined in AI::NNFlex::Mathlib. Valid predefined
 
 The error transformation function defines a transform that is done on the error value. It must be a valid function in AI::NNFlex::Mathlib. Using a non linear transformation function on the error value can sometimes speed up training.
 
+The following parameters are optional:
 
-=head3 init
+ persistentactivation
+
+ decay
+
+ randomactivation
+
+ threshold
+
+ errorfunction
+
+ randomweights
+
+
+
+=head2 init
 
  Syntax:
 
@@ -436,7 +457,7 @@ The error transformation function defines a transform that is done on the error 
 
 Initialises connections between nodes, sets initial weights and loads external components. Implements connections backwards and forwards from each node in each layer to each node in the preceeding and following layers, and initialises weights values on all connections. 
 
-=head3 lesion
+=head2 lesion
 
  $network->lesion ({'nodes'=>PROBABILITY,'connections'=>PROBABILITY})
 
@@ -450,13 +471,13 @@ Note: this method may be called on a per network, per node or per layer basis us
 
 =head2 AN::NNFlex::Dataset
 
-=head3 learn
+=head2 learn
 
  $dataset->learn($network)
 
 'Teaches' the network the dataset using the networks defined learning algorithm. Returns sqrError;
 
-=head3 run
+=head2 run
 
  $dataset->run($network)
 

@@ -57,6 +57,11 @@ use vars qw ($VERSION);
 #					constant, chopped out old legacy stuff
 #					put math functions in mathlib, etc etc
 #
+# 0.22 20050317		CColbourn	Implemented ::connect method
+#                                       dataset loading and saving, some
+#					improvements to the dataset syntax
+#
+#
 ###############################################################################
 # ToDo
 # ====
@@ -72,7 +77,7 @@ use vars qw ($VERSION);
 # Clean up the perldocs
 #
 ###############################################################################
-$VERSION = "0.21";
+$VERSION = "0.22";
 
 
 ###############################################################################
@@ -306,19 +311,7 @@ sub init
 					{
 						if ($connectionFromWest eq $node)
 						{
-							my $weight;
-							if ($network->{'fixedweights'})
-							{
-								$weight = $network->{'fixedweights'};
-							}
-							elsif ($network->{'randomweights'})
-							{
-								$weight = (rand(2*$network->{'randomweights'}))-$network->{'randomweights'};
-							}
-							else
-							{
-								$weight = (rand(2))-1;
-							}
+							my $weight = $network->calcweight;
 				
 							push @{$node->{'connectedNodesWest'}->{'nodes'}},$westNodes;
 							push @{$node->{'connectedNodesWest'}->{'weights'}},$weight;
@@ -336,19 +329,7 @@ sub init
 			{
 				if (!$network->{'randomconnections'}  || $network->{'randomconnections'} > rand(1))
 				{
-					my $weight;
-					if ($network->{'fixedweights'})
-					{
-						$weight = $network->{'fixedweights'};
-					}
-					elsif ($network->{'randomweights'})
-					{
-						$weight = (rand(2*$network->{'randomweights'}))-$network->{'randomweights'};
-					}
-					else
-					{
-						$weight = (rand(2))-1;
-					}
+					my $weight = $network->calcweight;
 					push @{$node->{'connectedNodesEast'}->{'nodes'}},$eastNodes;
 					push @{$node->{'connectedNodesEast'}->{'weights'}}, $weight;
 					if (scalar @debug > 0)
@@ -560,7 +541,7 @@ sub load_state
 			$nodeCounter++;
 		}
 	}
-
+	return 1;
 }
 
 ##############################################################################
@@ -589,6 +570,127 @@ sub lesion
 	return $return;
 
 }
+
+########################################################################
+# AI::NNFlex::connect
+########################################################################
+#
+# Joins layers or  nodes together.
+#
+# takes fromlayer=>INDEX, tolayer=>INDEX or
+# fromnode=>[LAYER,NODE],tonode=>[LAYER,NODE]
+#
+# returns success or failure
+#
+#
+#########################################################################
+sub connect
+{
+	my $network = shift;
+	my %params = @_;
+	my $result = 0;
+
+	if ($params{'fromnode'})
+	{
+		$result = $network->connectnodes(%params);
+	}
+	elsif ($params{'fromlayer'})
+	{
+		$result = $network->connectlayers(%params);
+	}
+	return $result;
+
+}
+
+########################################################################
+# AI::NNFlex::connectlayers
+########################################################################
+sub connectlayers
+{
+	my $network=shift;
+	my %params = @_;
+
+	my $fromlayerindex = $params{'fromlayer'};
+	my $tolayerindex = $params{'tolayer'};
+
+	foreach my $node (@{$network->{'layers'}->[$tolayerindex]->{'nodes'}})
+	{
+		foreach my $connectedNode ( @{$network->{'layers'}->[$fromlayerindex]->{'nodes'}})
+		{
+			my $weight1 = $network->calcweight;
+			my $weight2 = $network->calcweight;
+			push @{$node->{'connectedNodesWest'}->{'nodes'}},$connectedNode;
+			push @{$connectedNode->{'connectedNodesEast'}->{'nodes'}},$node;
+			push @{$node->{'connectedNodesWest'}->{'weights'}},$weight1;
+			push @{$connectedNode->{'connectedNodesEast'}->{'weights'}},$weight2;
+		}
+	}
+
+	return 1;
+}
+
+##############################################################
+# sub AI::NNFlex::connectnodes
+##############################################################
+sub connectnodes
+{
+	my $network = shift;
+	my %params = @_;
+
+	$params{'tonode'} =~ s/\'//g;
+	$params{'fromnode'} =~ s/\'//g;
+	my @tonodeindex = split /,/,$params{'tonode'};
+	my @fromnodeindex = split /,/,$params{'fromnode'};
+
+	#make the connections
+	my $node = $network->{'layers'}->[$tonodeindex[0]]->{'nodes'}->[$tonodeindex[1]];
+	my $connectedNode = $network->{'layers'}->[$fromnodeindex[0]]->{'nodes'}->[$fromnodeindex[1]];
+
+	my $weight1 = $network->calcweight;
+	my $weight2 = $network->calcweight;
+
+	push @{$node->{'connectedNodesWest'}->{'nodes'}},$connectedNode;
+	push @{$connectedNode->{'connectedNodesEast'}->{'nodes'}},$node;
+	push @{$node->{'connectedNodesWest'}->{'weights'}},$weight1;
+	push @{$connectedNode->{'connectedNodesEast'}->{'weights'}},$weight2;
+
+
+	return 1;
+}
+
+
+
+##############################################################
+# AI::NNFlex::calcweight
+##############################################################
+#
+# calculate an initial weight appropriate for the network
+# settings.
+# takes no parameters, returns weight
+##############################################################
+sub calcweight
+{
+	my $network= shift;
+	my $weight;
+	if ($network->{'fixedweights'})
+	{
+		$weight = $network->{'fixedweights'};
+	}
+	elsif ($network->{'randomweights'})
+	{
+		$weight = (rand(2*$network->{'randomweights'}))-$network->{'randomweights'};
+	}
+	else
+	{
+		$weight = (rand(2))-1;
+	}
+				
+
+	return $weight;
+}
+
+
+
 
 
 ###############################################################################
@@ -888,6 +990,16 @@ init adds the following attributes to each node:
 The connections to easterly nodes are not used in feedforward networks.
 Init also implements the Bias node if specified in the network config.
 
+=head3 connect
+
+Syntax:
+ $network->connect(fromlayer=>1,tolayer=>0);
+ $network->connect(fromnode=>'1,1',tonode=>'0,0');
+
+Connect allows you to manually create connections between layers or nodes, including recurrent connections back to the same layer/node. Node indices must be LAYER,NODE, numbered from 0.
+
+Weight assignments for the connection are calculated based on the network wide weight policy (see INIT).
+
 =head3 lesion
 
  $network->lesion (nodes=>PROBABILITY,connections=>PROBABILITY)
@@ -963,6 +1075,8 @@ v0.17 is a bugfix release, plus some cleaning of UI
 v0.20 changes AI::NNFlex to be a base class, and ships three different network types (i.e. training algorithms). Backprop & momentum are both networks of the feedforward class, and inherit their 'run' method from feedforward.pm. 0.20 also fixes a whole raft of bugs and 'not nices'.
 
 v0.21 cleans up the perldocs more, and makes nnflex more distinctly a base module. There are quite a number of changes in Backprop in the v0.21 distribution.
+
+v0.22 introduces the ::connect method, to allow creation of recurrent connections, and manual control over connections between nodes/layers.
 
 =head1 COPYRIGHT
 
