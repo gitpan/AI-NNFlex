@@ -114,13 +114,15 @@ close CARS;
 # data now constructed, we can do the NN thing
 ######################################################################
 
-use AI::NNFlex::momentum;
+use AI::NNFlex::Backprop;
 use AI::NNFlex::Dataset;
 
 my $dataset = AI::NNFlex::Dataset->new(\@dataArray);
 
 
-my $network = AI::NNFlex::momentum->new( learningrate=>.1,
+my $network = AI::NNFlex::Backprop->new( learningrate=>.1,
+				fahlmanconstant=>0.1,
+				errorfunction=>"atanh",
 				bias=>1,
 				momentum=>0.6);
 

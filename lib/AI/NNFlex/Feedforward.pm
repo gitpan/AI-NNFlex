@@ -1,5 +1,5 @@
 ##########################################################
-# AI::NNFlex::feedforward
+# AI::NNFlex::Feedforward
 ##########################################################
 # This is the first propagation module for NNFlex
 #
@@ -31,6 +31,10 @@
 # 1.5	20050308	CColbourn	Made a separate class as part
 #					of NNFlex-0.2
 #
+# 1.6	20050313	CColbourn	altered syntax of activation
+#					function call to get rid of
+#					eval
+#
 ##########################################################
 # ToDo
 # ----
@@ -38,35 +42,17 @@
 #
 ###########################################################
 #
-package AI::NNFlex::feedforward;
+package AI::NNFlex::Feedforward;
 
 use strict;
 
-##########################################################
-# AI::NNFlex::feedforward
-##########################################################
-=pod
-=head1 AI::NNFlex::feedforward - feedforward module for NNFlex
-
-=item
-
-This module is the feedforward network type for NNFlex. It provides activation flow functions for network types like backprop & momentum.
-
-Copyright (c) 2004-2005 Charles Colbourn. All rights reserved. This program is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-=cut
-
-
-
-
 
 ###########################################################
-# AI::NNFlex::feedforward::run
+# AI::NNFlex::Feedforward::run
 ###########################################################
 #
 #This class contains the run method only. The run method performs
-#feedforward  (i.e. west to east) activation flow on the network.
+#Feedforward  (i.e. west to east) activation flow on the network.
 #
 #This class is internal to the NNFlex package, and is included
 #in the NNFlex namespace by a require on the networktype parameter.
@@ -93,7 +79,7 @@ sub run
 
 	my @debug = @{$network->{'debug'}};
 	if (scalar @debug> 0)
-	{$network->dbug ("Input pattern @inputPattern received by feedforward",3);}
+	{$network->dbug ("Input pattern @inputPattern received by Feedforward",3);}
 
 
 	# First of all apply the activation pattern to the input units (checking
@@ -170,9 +156,10 @@ sub run
 				my $value = $totalActivation;
 
 				my $function = $node->{'activationfunction'};
-				my $functionCall ="\$value = \$network->$function(\$value);";
+				#my $functionCall ="\$value = \$network->$function(\$value);";
 
-				eval($functionCall);
+				#eval($functionCall);
+				$value = $network->$function($value);
 				$node->{'activation'} = $value;
 			}
 			if (scalar @debug> 0)
@@ -192,3 +179,50 @@ sub run
 
 1;
 
+=pod
+
+=head1 NAME
+
+AI::NNFlex::Feedforward - methods for feedforward neural networks
+
+=head1 SYNOPSIS
+
+ use AI::NNFlex::Feedforward;
+
+ $network->run([array of inputs]);
+
+=head1 DESCRIPTION
+
+AI::NNFlex::Feedforward provides a run method to flow activation through an NNFlex network in west to east feedforward style. 
+
+=head1 CONSTRUCTOR 
+
+None
+
+=head1 METHODS
+
+=head1 AI::NNFlex::Feedforward::run
+
+takes an array of inputs for the network. Returns true or false.
+
+=head1 SEE ALSO
+
+ 
+ AI::NNFlex
+ AI::NNFlex::Backprop
+ AI::NNFlex::Dataset 
+
+
+=head1 CHANGES
+
+
+
+=head1 COPYRIGHT
+
+Copyright (c) 2004-2005 Charles Colbourn. All rights reserved. This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+
+=head1 CONTACT
+
+ charlesc@nnflex.g0n.net
+
+=cut

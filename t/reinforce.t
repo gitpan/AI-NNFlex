@@ -1,13 +1,13 @@
 use strict;
 use Test;
-use AI::NNFlex::reinforce;
+use AI::NNFlex::Reinforce;
 use AI::NNFlex::Dataset;
 
 BEGIN{
 	plan tests=>5}
 
 # test create network
-my $network = AI::NNFlex::reinforce->new(randomconnections=>0,
+my $network = AI::NNFlex::Reinforce->new(randomconnections=>0,
 				randomweights=>1,
 				learningrate=>.1,
 				debug=>[],bias=>1);

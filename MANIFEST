@@ -1,9 +1,6 @@
-lib/AI/NNFlex/reinforce.pm
-lib/AI/NNFlex/feedforward.pm
-lib/AI/NNFlex/backprop.pm
-lib/AI/NNFlex/momentum.pm
+lib/AI/NNFlex/Reinforce.pm
+lib/AI/NNFlex/Feedforward.pm
+lib/AI/NNFlex/Backprop.pm
 lib/AI/NNFlex/Dataset.pm
-lib/AI/NNFlex/tanh.pm
-lib/AI/NNFlex/linear.pm
-lib/AI/NNFlex/sigmoid.pm
+lib/AI/NNFlex/Mathlib.pm
 lib/AI/NNFlex.pm

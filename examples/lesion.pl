@@ -2,12 +2,12 @@
 # and node lesioning
 
 use strict;
-use AI::NNFlex::momentum;
+use AI::NNFlex::Backprop;
 use AI::NNFlex::Dataset;
 
 # Create the network 
 
-my $network = AI::NNFlex::momentum->new(randomconnections=>0,
+my $network = AI::NNFlex::Backprop->new(randomconnections=>0,
 				randomweights=>1,
 				learningrate=>.1,
 				debug=>[],bias=>1,

@@ -1,13 +1,13 @@
 use strict;
 use Test;
-use AI::NNFlex::backprop;
+use AI::NNFlex::Backprop;
 use AI::NNFlex::Dataset;
 
 BEGIN{
-	plan tests=>7}
+	plan tests=>6}
 
 # test create network
-my $network = AI::NNFlex::backprop->new(randomconnections=>0,
+my $network = AI::NNFlex::Backprop->new(randomconnections=>0,
 				randomweights=>1,
 				learningrate=>.1,
 				debug=>[],bias=>1,
@@ -53,6 +53,3 @@ $result = $dataset->run($network);
 ok($result); #test 6
 ##
 
-# test a lesion call
-$result = $network->lesion(nodes=>0.5,connections=>0.5);
-ok($result); #test 7

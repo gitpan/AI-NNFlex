@@ -20,27 +20,10 @@
 use strict;
 package AI::NNFlex::Dataset;
 
+
 ###########################################################
 # AI::NNFlex::Dataset::new
 ###########################################################
-=pod
-
-=head1 AI::NNFlex::Dataset::new
-
-=item 
-
-Constructor, creates a data set to run through the network.
-Takes as parameters an anonymous hash containing input array
-and target output array, as follows:
-
-my $dataset = AI::NNFlex::Dataset->new([
-		[0,1,1,0,1,0],[1,1],
-		[0,0,1,1,0,0],[1,0]]);
-
-returns dataset object
-
-=cut
-
 sub new
 {
 	my $class = shift;
@@ -58,27 +41,6 @@ sub new
 ###########################################################
 # AI::NNFlex::Datasets::run
 ###########################################################
-=pod
-
-=head1 AI::NNFlex::Datasets::run
-
-=item
-
-Run a data set through the network and return the outputs.
-
-Takes as parameter the network object you want to run the
-data against.
-
-Inspired by the Xerion/UTS approach to managing datasets.
-
-Syntax:
-
-$dataset->run($network);
-
-returns a reference to an hash containing input to actual
-outputs in array form.
-
-=cut
 sub run
 {
 	my $self = shift;
@@ -100,22 +62,6 @@ sub run
 ###############################################################
 # AI::NNFlex::Dataset::learn
 ###############################################################
-=pod
-
-=head1 AI::NNFlex::Dataset::learn
-
-for each entry in the dataset, run through the network then call
-the networks learning algorithm. Takes as a parameter the network
-you want to train.
-
-Syntax:
-
-my $error = $dataset->learn($network);
-
-returns network sqrd err.
-
-=cut
-
 sub learn
 {
 	my $self = shift;

@@ -1,3 +1,31 @@
+0.21
+20050313
+
+Rewrote all the pod. Its probably a bit sparse now, but its 
+much more accurate.
+
+Removed the eval calls from feedforward, backprop & momentum
+for speed.
+
+Implemented fahlman constant. This eliminates the 'flat spot'
+problem, and gets the network to converge more reliably. XOR
+seems to never get stuck with this set to 0.1. as a bonus, its 
+also about 50% faster (do you sense a theme developing here?)
+
+Removed momentum module (well, removed backprop module and 
+renamed momentum module in fact). There were few code differences
+and its easier to maintain this way. Default option is vanilla
+backprop, momentum & fahlman adjustments are only implemented if
+specified in the network config.
+
+Bundled all the maths functions into AI::NNFlex::Mathlib
+
+Implemented calls to error transformation function, as per
+Fahlman. Testing, it doesn't seem to make much difference, but
+at least now the facility is there.
+
+#############################################################
+
 0.20
 20050308
 

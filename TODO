@@ -1,21 +1,12 @@
 
-Correct documentation of datasets::run, returns output array
-not hash of input to output
+Write a simple net simulator with syntax loosely based on xerion. At
+present this lot is API driven, it should be straightforward to write
+a basic simulator that calls the API in the backend.
 
 Remove pdl::Datasets new after correcting bless in nnflex datasets
 to two param form
 
-Redocument to reflect 0.2 refactoring for inheritance and hence
-new syntax
-
-Put documentation for the individual network subclasses back into
-their PMs.
-
 Implement a 'connect' method to allow recurrent connections, forced node connections can use index [x,x]. Need to decide on a good parameter syntax for that.
-
-investigate whether random weights should be permitted to be negative or positive only for fasted convergence
-
-simple frontend script
 
 read & write methods for both networks and datasets modelled on snns format (for use with frontend script). data should be snns format, network definition file will probably have to differ
 
