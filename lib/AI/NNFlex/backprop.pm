@@ -75,7 +75,10 @@ sub calc_error
 	my $outputPatternRef = shift;
 	my @outputPattern = @$outputPatternRef;
 
-	$network->dbug ("Output pattern @outputPattern received by backprop",4);
+	my @debug = @{$network->{'debug'}};
+
+	if (scalar @debug > 0)
+	{$network->dbug ("Output pattern @outputPattern received by backprop",4);}
 
 
 	my $outputLayer = $network->{'layers'}->[-1]->{'nodes'};
@@ -94,7 +97,8 @@ sub calc_error
 		
 		$_->{'error'} = $value;
 		$counter++;
-		$network->dbug ("Error on output node $_ = ".$_->{'error'},4);
+		if (scalar @debug > 0)
+		{$network->dbug ("Error on output node $_ = ".$_->{'error'},4);}
 	}
 
 
@@ -170,13 +174,17 @@ sub hiddenToOutput
 
 	my $outputLayer = $network->{'layers'}->[-1]->{'nodes'};
 
+	my @debug = @{$network->{'debug'}};
+
 	foreach my $node (@$outputLayer)
 	{
 		foreach my $connectedNode (@{$node->{'connectedNodesWest'}->{'nodes'}})
 		{
-			$network->dbug("Learning rate is ".$network->{'learningrate'},4);
+			if (scalar @debug > 0)
+			{$network->dbug("Learning rate is ".$network->{'learningrate'},4);} 
 			my $deltaW = (($network->{'learningrate'}) * ($node->{'error'}) * ($connectedNode->{'activation'}));
-			$network->dbug("Applying delta $deltaW on hiddenToOutput $connectedNode to $node",4);
+			if (scalar @debug > 0)
+			{$network->dbug("Applying delta $deltaW on hiddenToOutput $connectedNode to $node",4);}
 			# 
 			$node->{'connectedNodesWest'}->{'weights'}->{$connectedNode} -= $deltaW;
 				
@@ -211,13 +219,15 @@ sub hiddenOrInputToHidden
 	my $network = shift;
 
 	my @layers = @{$network->{'layers'}};
+	my @debug =@{$network->{'debug'}};
+	
 
 	# remove the last element (The output layer) from the stack
 	# because we've already calculated dW on that
 	pop @layers;
 
-
-	$network->dbug("Starting backprop of error on ".scalar @layers." hidden layers",4);
+	if (scalar @debug > 0)
+	{$network->dbug("Starting backprop of error on ".scalar @layers." hidden layers",4);}
 
 	foreach my $layer (reverse @layers)
 	{
@@ -230,7 +240,8 @@ sub hiddenOrInputToHidden
 			{
 				$nodeError += ($connectedNode->{'error'}) * ($connectedNode->{'connectedNodesWest'}->{'weights'}->{$node});
 			}
-			$network->dbug("Hidden node $node error = $nodeError",4);
+			if (scalar @debug > 0)
+			{$network->dbug("Hidden node $node error = $nodeError",4);}
 			$node->{'error'} = $nodeError;
 
 
@@ -246,9 +257,11 @@ sub hiddenOrInputToHidden
 				$value = $value * $node->{'error'} * $network->{'learningrate'} * $westNodes->{'activation'};
 				
 				my $dW = $value;
-				$network->dbug("Applying deltaW $dW to inputToHidden connection from $westNodes to $node",4);
+				if (scalar @debug > 0)
+				{$network->dbug("Applying deltaW $dW to inputToHidden connection from $westNodes to $node",4);}
 				$node->{'connectedNodesWest'}->{'weights'}->{$westNodes} -= $dW;
-				$network->dbug("Weight now ".$node->{'connectedNodesWest'}->{'weights'}->{$westNodes},4);
+				if (scalar @debug > 0)
+				{$network->dbug("Weight now ".$node->{'connectedNodesWest'}->{'weights'}->{$westNodes},4);}
 			}	
 
 
@@ -280,6 +293,8 @@ sub RMSErr
 	my $outputPatternRef = shift;
 	my @outputPattern = @$outputPatternRef;
 
+	my @debug = @{$network->{'debug'}};
+
 	my $sqrErr;
 
 	my $outputLayer = $network->{'layers'}->[-1]->{'nodes'};
@@ -298,7 +313,8 @@ sub RMSErr
 
 		$sqrErr += $value *$value;
 		$counter++;
-		$network->dbug("Error on output node $_ = ".$_->{'error'},4);
+		if (scalar @debug > 0)
+		{$network->dbug("Error on output node $_ = ".$_->{'error'},4);}
 	}
 
 	my $error = sqrt($sqrErr);

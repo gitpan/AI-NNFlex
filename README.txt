@@ -3,7 +3,7 @@
 NNFlex - a flexible native perl API for neural networks
 
 Author: Charles Colbourn
-Version: 0.14
+Version: 0.15
 Date: February 2005
 
 NNFLEX is intended to be a flexible framework for
@@ -145,7 +145,7 @@ another decimal point.
 
 
 VERSION
-0.14
+0.15
 
 ACKNOWLEDGEMENTS
 Phil Brierley, for making his excellent example code
@@ -195,6 +195,7 @@ gamma network module (DHYB)
 Hopfield module
 quickprop learning
 Boltzmann module
+PDL option for faster execution
 
 
 COPYRIGHT

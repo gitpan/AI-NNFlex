@@ -42,7 +42,10 @@ sub linear
 
 	my $network = shift;
 	my $value = shift;	
-	$network->dbug("Linear activation returning $value",5);	
+
+	my @debug = @{$network->{'debug'}};
+	if (scalar @debug >0)
+	{$network->dbug("Linear activation returning $value",5)};	
 	return $value;
 }
 
@@ -50,7 +53,9 @@ sub linear_slope
 {
 	my $network = shift;
 	my $value = shift;
-	$network->dbug("Linear slope returning $value",5);
+	my @debug = @{$network->{'debug'}};
+	if (scalar @debug >0)
+	{$network->dbug("Linear slope returning $value",5)};
 	return $value;
 }
 

@@ -1,3 +1,19 @@
+0.15
+20050206
+
+I've rushed another release out because I found a big fat bug
+in feedforward. Instead of applying the transfer function to
+the summed node inputs, it was applying it to each input in
+turn, then again to the sum. Wups! The network is now more
+stable and a lot faster.
+
+I also altered the debug calls, so in normal use without debug
+the overhead is a lot smaller.
+
+This version, particular in use with momentum, is a LOT faster.
+
+###############################################################
+
 0.14
 20050201
 

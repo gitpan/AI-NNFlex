@@ -51,17 +51,20 @@ sub tanh
 	my $network = shift;
 	my $value = shift;
 
+	my @debug = @{$network->{'debug'}};
+
 	my $a = exp($value);
 	my $b = exp(-$value);
    if ($value > 20){ $value=1;}
     elsif ($value < -20){ $value= -1;}
     else
         {
-        my $a = exp($value);
-        my $b = exp(-$value);
-        $value =  ($a-$b)/($a+$b);
+	        my $a = exp($value);
+       		 my $b = exp(-$value);
+   	        $value =  ($a-$b)/($a+$b);
         }
-	$network->dbug("Tanh activation returning $value",5);	
+	if (scalar @debug > 0)
+	{$network->dbug("Tanh activation returning $value",5)};	
 	return $value;
 }
 
@@ -69,8 +72,13 @@ sub tanh_slope
 {
 	my $network = shift;
 	my $value = shift;
+	my @debug = @{$network->{'debug'}};
+
+
 	my $return = 1-($value*$value);
-	$network->dbug("Tanh_slope returning $value",5);
+	if (scalar @debug > 0)
+	{$network->dbug("Tanh_slope returning $value",5);}
+
 	return $return;
 }
 

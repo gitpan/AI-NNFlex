@@ -14,6 +14,12 @@
 #					is erroneously called
 #					with a dataset
 #
+# 1.2	20050206	CColbourn	Fixed a bug where
+#					transfer function
+#					was called on every
+#					input to a node
+#					instead of total
+#
 ##########################################################
 # ToDo
 # ----
@@ -82,7 +88,9 @@ sub run
 
 	my @inputPattern = @$inputPatternRef;
 
-	$network->dbug ("Input pattern @inputPattern received by feedforward",3);
+	my @debug = @{$network->{'debug'}};
+	if (scalar @debug> 0)
+	{$network->dbug ("Input pattern @inputPattern received by feedforward",3);}
 
 
 	# First of all apply the activation pattern to the input units (checking
@@ -106,12 +114,14 @@ sub run
 			if ($_->{'persistentactivation'})
 			{
 				$_->{'activation'} +=$inputPattern[$counter];
-				$network->dbug("Applying ".$inputPattern[$counter]." to $_",3);
+				if (scalar @debug> 0)
+				{$network->dbug("Applying ".$inputPattern[$counter]." to $_",3);}
 			}
 			else
 			{
 				$_->{'activation'} =$inputPattern[$counter];
-				$network->dbug("Applying ".$inputPattern[$counter]." to $_",3);
+				if (scalar @debug> 0)
+				{$network->dbug("Applying ".$inputPattern[$counter]." to $_",3);}
 			 
 			}
 		}
@@ -127,28 +137,28 @@ sub run
 		foreach my $node (@{$layer->{'nodes'}})
 		{
 
+			# Set the node to 0 if not persistent
 			if (!($node->{'persistentactivation'}))
 			{
 				$node->{'activation'} =0;
 			}
 
+			# Decay the node (note that if decay is not set this
+			# will have no effect, hence no if).
+			$node->{'activation'} -= $node->{'decay'};
+
 			foreach my $connectedNode (@{$node->{'connectedNodesWest'}->{'nodes'}})
 			{
-				$network->dbug("Flowing from $connectedNode to $node",3);
+				if (scalar @debug> 0)
+				{$network->dbug("Flowing from $connectedNode to $node",3);}
 	
 				my $weight = ${$node->{'connectedNodesWest'}->{'weights'}}{$connectedNode};
 				my $activation = $connectedNode->{'activation'};		
-				$network->dbug("Weight & activation: $weight - $activation",3);
+				if (scalar @debug> 0)
+				{$network->dbug("Weight & activation: $weight - $activation",3);}
 				
-				# Decay the node (note that if decay is not set this
-				# will have no effect, hence no if).
-				$node->{'activation'} -= $node->{'decay'};
 
 				my $totalActivation = $weight*$activation;
-				#my $value = $totalActivation;
-				my $function = $node->{'activationfunction'};
-				my $functionCall ="\$totalActivation = \$network->$function(\$totalActivation);";
-				eval($functionCall);
 				$node->{'activation'} +=$totalActivation; 
 	
 			}
@@ -161,10 +171,10 @@ sub run
 				my $functionCall ="\$value = \$network->$function(\$value);";
 
 				eval($functionCall);
-				#my $value = $node->'$function'($network,$value);
 				$node->{'activation'} = $value;
 			}
-			$network->dbug("Final activation of $node = ".$node->{'activation'},3);
+			if (scalar @debug> 0)
+			{$network->dbug("Final activation of $node = ".$node->{'activation'},3);}
 		}
 	}
 

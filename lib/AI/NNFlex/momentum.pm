@@ -83,7 +83,10 @@ sub calc_error
 	my $outputPatternRef = shift;
 	my @outputPattern = @$outputPatternRef;
 
-	$network->dbug ("Output pattern @outputPattern received by momentum",4);
+	my @debug = @{$network->{'debug'}};
+
+	if (scalar @debug > 0)
+	{$network->dbug ("Output pattern @outputPattern received by momentum",4);}
 
 
 	my $outputLayer = $network->{'layers'}->[-1]->{'nodes'};
@@ -101,7 +104,8 @@ sub calc_error
 		my $value = $_->{'activation'} - $outputPattern[$counter];
 		$_->{'error'} = $value;
 		$counter++;
-		$network->dbug ("Error on output node $_ = ".$_->{'error'},4);
+		if (scalar @debug > 0)
+		{$network->dbug ("Error on output node $_ = ".$_->{'error'},4);}
 	}
 
 
@@ -140,7 +144,6 @@ sub learn
 	}
 
 
-
 	my @outputPattern = @$outputPatternRef;
 
 	$network->calc_error($outputPatternRef);
@@ -176,6 +179,8 @@ sub hiddenToOutput
 {
 	my $network = shift;
 
+	my @debug = @{$network->{'debug'}};
+
 	my $outputLayer = $network->{'layers'}->[-1]->{'nodes'};
 
 	foreach my $node (@$outputLayer)
@@ -187,14 +192,14 @@ sub hiddenToOutput
 			{
 				$momentum = ($network->{'momentum'})*($node->{'connectedNodesWest'}->{'lastdelta'}->{$connectedNode});
 			}
-
-			$network->dbug("Learning rate is ".$network->{'learningrate'},4);
+			if (scalar @debug > 0)
+			{$network->dbug("Learning rate is ".$network->{'learningrate'},4);}
 			my $deltaW = (($network->{'learningrate'}) * ($node->{'error'}) * ($connectedNode->{'activation'}));
 			$deltaW = $deltaW+$momentum;
 			$node->{'connectedNodesWest'}->{'lastdelta'}->{$connectedNode} = $deltaW;
 			
-
-			$network->dbug("Applying delta $deltaW on hiddenToOutput $connectedNode to $node",4);
+			if (scalar @debug > 0)
+			{$network->dbug("Applying delta $deltaW on hiddenToOutput $connectedNode to $node",4);}
 			# 
 			$node->{'connectedNodesWest'}->{'weights'}->{$connectedNode} -= $deltaW;
 		}
@@ -230,12 +235,14 @@ sub hiddenOrInputToHidden
 
 	my @layers = @{$network->{'layers'}};
 
+	my @debug = @{$network->{'debug'}};
+
 	# remove the last element (The output layer) from the stack
 	# because we've already calculated dW on that
 	pop @layers;
 
-
-	$network->dbug("Starting momentum of error on ".scalar @layers." hidden layers",4);
+	if (scalar @debug > 0)
+	{$network->dbug("Starting momentum of error on ".scalar @layers." hidden layers",4);}
 
 	foreach my $layer (reverse @layers)
 	{
@@ -248,7 +255,8 @@ sub hiddenOrInputToHidden
 			{
 				$nodeError += ($connectedNode->{'error'}) * ($connectedNode->{'connectedNodesWest'}->{'weights'}->{$node});
 			}
-			$network->dbug("Hidden node $node error = $nodeError",4);
+			if (scalar @debug > 0)
+			{$network->dbug("Hidden node $node error = $nodeError",4);}
 			$node->{'error'} = $nodeError;
 
 
@@ -273,12 +281,14 @@ sub hiddenOrInputToHidden
 				
 				my $dW = $value;
 				$dW = $dW + $momentum;
-				$network->dbug("Applying deltaW $dW to inputToHidden connection from $westNodes to $node",4);
+				if (scalar @debug > 0)
+				{$network->dbug("Applying deltaW $dW to inputToHidden connection from $westNodes to $node",4);}
 
 				$node->{'connectedNodesWest'}->{'lastdelta'}->{$westNodes} = $dW;
 
 				$node->{'connectedNodesWest'}->{'weights'}->{$westNodes} -= $dW;
-				$network->dbug("Weight now ".$node->{'connectedNodesWest'}->{'weights'}->{$westNodes},4);
+				if (scalar @debug > 0)
+				{$network->dbug("Weight now ".$node->{'connectedNodesWest'}->{'weights'}->{$westNodes},4);}
 			}	
 
 
@@ -310,6 +320,8 @@ sub RMSErr
 	my $outputPatternRef = shift;
 	my @outputPattern = @$outputPatternRef;
 
+	my @debug = @{$network->{'debug'}};
+
 	my $sqrErr;
 
 	my $outputLayer = $network->{'layers'}->[-1]->{'nodes'};
@@ -328,7 +340,8 @@ sub RMSErr
 
 		$sqrErr += $value *$value;
 		$counter++;
-		$network->dbug("Error on output node $_ = ".$_->{'error'},4);
+		if (scalar @debug > 0)
+		{$network->dbug("Error on output node $_ = ".$_->{'error'},4);}
 	}
 
 	my $error = sqrt($sqrErr);

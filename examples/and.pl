@@ -57,12 +57,12 @@ $object->dump_state({'filename'=>"weights-run.wts",'activations'=>1});
 
 
 
-use AI::NNFlex::draw;
+#use AI::NNFlex::draw;
 
-my $image = AI::NNFlex::draw->network($object);
+#my $image = AI::NNFlex::draw->network($object);
 
-open (GIF,">and.gif");
-binmode GIF;
-print GIF $image;
-close GIF;
+#open (GIF,">and.gif");
+#binmode GIF;
+#print GIF $image;
+#close GIF;
 

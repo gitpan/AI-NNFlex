@@ -37,6 +37,11 @@ use vars qw ($VERSION);
 #					function into a separate function call
 #					instead of hardcoded 1-y*y in backprop
 #					tanh, linear & momentum
+#
+# 0.15 20050206		CColbourn	Fixed a bug in feedforward.pm. Stopped
+#					calling dbug unless scalar debug > 0
+#					in a lot of calls
+#
 ###############################################################################
 # ToDo
 # ====
@@ -59,7 +64,7 @@ use vars qw ($VERSION);
 # Clean up the perldocs
 #
 ###############################################################################
-$VERSION = "0.14";
+$VERSION = "0.15";
 
 
 ###############################################################################
@@ -302,6 +307,8 @@ AI::NNFlex - A customisable neural network simulator
   can't be loaded
  v0.14 fixes momentum and backprop so they are no longer nailed to tanh hidden
   units only.
+ v0.15 fixes a bug in feedforward, and reduces the debug overhead
+  
 
 =head1 COPYRIGHT
 
@@ -621,19 +628,22 @@ sub init
 	my $network = shift;
 	my @layers = @{$network->{'layers'}};
 
+	my @debug = @{$network->{'debug'}};
+
 	# one of the parameters will normally be networktype
 	# this specifies a class for activation flow, which
 	# is included here
 	if( $network->{'networktype'})
 	{
 		my $requirestring = "require \"AI/NNFlex/".$network->{'networktype'}.".pm\"";
-		if (!eval($requirestring)){die "Can't load type ".$network->{'networktype'}.".pm\n"};
+		if (!eval($requirestring)){die "Can't load type ".$network->{'networktype'}.".pm because $@\n"};
 	}
 	if( $network->{'learningalgorithm'})
 	{
 		my $requirestring = "require \"AI/NNFlex/".$network->{'learningalgorithm'}.".pm\"";
-		if (!eval($requirestring)){die "Can't load ".$network->{'learningalgorithm'}.".pm\n"};
+		if (!eval($requirestring)){die "Can't load ".$network->{'learningalgorithm'}.".pm because $@\n"};
 	}
+
 	# implement the bias node
 	if ($network->{'bias'})
 	{
@@ -674,20 +684,8 @@ sub init
 							}
 							push @{$node->{'connectedNodesWest'}->{'nodes'}},$westNodes;
 							${$node->{'connectedNodesWest'}->{'weights'}}{$westNodes} = $weight;
-							#${$node->{'connectedNodesWest'}}{$connectionFromWest} = $weight;
-							#my $westNodeRef = \$westNodes;
-							#${$node->{'connectedNodesWest'}}{$westNodeRef} = $weight;
-							
-							#if ($network->{'bias'} && $currentLayer ==0)
-							#if ($network->{'bias'} && !$alreadyBiased)
-							#{
-							#	push @{$node->{'connectedNodesWest'}->{'nodes'}},$network->{'biasNode'};
-							#	$network->{'biasNode'}->{'activation'}=1;
-							#	$network->dbug ("West to east Connection - ".$network->{'biasNode'}." to $node",2);
-							#	$alreadyBiased=1; # make sure only 1 bias connection per node
-							#}
-								
-							$network->dbug ("West to east Connection - $westNodes to $node",2);
+							if (scalar @debug > 0)	
+							{$network->dbug ("West to east Connection - $westNodes to $node",2);}
 						}
 					}
 				}
@@ -711,7 +709,8 @@ sub init
 					}
 					push @{$node->{'connectedNodesEast'}->{'nodes'}},$eastNodes;
 					${$node->{'connectedNodesEast'}->{'weights'}}{$eastNodes} = $weight;
-					$network->dbug ("East to west Connection $node to $eastNodes",2);
+					if (scalar @debug > 0)
+					{$network->dbug ("East to west Connection $node to $eastNodes",2);}
 				}
 			}
 			}
@@ -739,8 +738,8 @@ sub init
 					$weight = 0;
 				}
 				${$node->{'connectedNodesWest'}->{'weights'}}{$network->{'biasNode'}} = $weight;
-
-				$network->dbug ("West to east Connection - ".$network->{'biasNode'}." to $node weight = $weight",2);
+				if (scalar @debug > 0)
+				{$network->dbug ("West to east Connection - ".$network->{'biasNode'}." to $node weight = $weight",2);}
 			}
 		}
 	}
