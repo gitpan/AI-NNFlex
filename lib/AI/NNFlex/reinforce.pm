@@ -19,6 +19,9 @@
 #					addressing from hash to
 #					array for nnf0.16
 #
+# 1.3	20050307	CColbourn	repackaged as a subclass
+#					of nnflex
+#
 ##########################################################
 # ToDo
 # ----
@@ -26,6 +29,11 @@
 #
 ###########################################################
 #
+
+package AI::NNFlex::reinforce;
+use AI::NNFlex;
+use AI::NNFlex::feedforward;
+use base qw(AI::NNFlex AI::NNFlex::feedforward);
 use strict;
 
 ###########################################################

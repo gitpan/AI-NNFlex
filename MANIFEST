@@ -3,7 +3,6 @@ lib/AI/NNFlex/feedforward.pm
 lib/AI/NNFlex/backprop.pm
 lib/AI/NNFlex/momentum.pm
 lib/AI/NNFlex/Dataset.pm
-lib/AI/NNFlex/draw.pm
 lib/AI/NNFlex/tanh.pm
 lib/AI/NNFlex/linear.pm
 lib/AI/NNFlex/sigmoid.pm

@@ -1,4 +1,5 @@
 # Example demonstrating XOR with momentum backprop learning
+# and minimal set of parameters (using default values)
 
 use strict;
 use AI::NNFlex::momentum;
@@ -6,35 +7,21 @@ use AI::NNFlex::Dataset;
 
 # Create the network 
 
-my $network = AI::NNFlex::momentum->new(randomconnections=>0,
-				randomweights=>1,
-				learningrate=>.1,
-				debug=>[],bias=>1,
+my $network = AI::NNFlex::momentum->new( learningrate=>.1,
+				bias=>1,
 				momentum=>0.6,
 				round=>1);
 
 
 
 $network->add_layer(	nodes=>2,
-			persistentactivation=>0,
-			decay=>0.0,
-			randomactivation=>0,
-			threshold=>0.0,
 			activationfunction=>"tanh");
 
 
 $network->add_layer(	nodes=>2,
-			persistentactivation=>0,
-			decay=>0.0,
-			randomactivation=>0,
-			threshold=>0.0,
 			activationfunction=>"tanh");
 
 $network->add_layer(	nodes=>1,
-			persistentactivation=>0,
-			decay=>0.0,
-			randomactivation=>0,
-			threshold=>0.0,
 			activationfunction=>"linear");
 
 

@@ -13,6 +13,9 @@
 # 1.2	20050201	CColbourn	Inseted call to activation
 #					slope function
 #
+# 1.3	20050307	CColbourn	packaged as a subclass of
+#					nnflex
+#
 ##########################################################
 # ToDo
 # ----
@@ -20,6 +23,12 @@
 #
 ###########################################################
 #
+package AI::NNFlex::backprop;
+use AI::NNFlex;
+use AI::NNFlex::feedforward;
+use base qw(AI::NNFlex AI::NNFlex::feedforward);
+
+
 use strict;
 
 ###########################################################
@@ -31,9 +40,7 @@ use strict;
 
 =item
 
-This module is the backpropagation algorithm for NNFlex. it
-is included in the NNFlex namespace at run time. See documentation
-below for standard methods.
+This module is the backpropagation algorithm for NNFlex. 
 
 Copyright (c) 2004-2005 Charles Colbourn. All rights reserved. This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
@@ -43,30 +50,20 @@ it under the same terms as Perl itself.
 ###########################################################
 #AI::NNFlex::backprop::learn
 ###########################################################
-=pod
+#
+#Takes as a parameter a reference to the desired output
+#pattern, performs one learning pass back through the network 
+#with normal backprop procedures to bring the network closer 
+#to convergence.
+#
+#syntax:
+# $network->learn([0,1,1,0]);
+#
 
-=head1 AI::NNFlex::backprop::learn
-
-=item
-
-Takes as a parameter a reference to the desired output
-pattern, performs one learning pass back through the network 
-with normal backprop procedures to bring the network closer 
-to convergence.
-
-This package is imported into the NNFlex namespace at runtime
-via a parameter to the network object.
-
-syntax:
- $network->learn([0,1,1,0]);
-
-=cut
 
 ###########################################################
 # AI::NNFlex::backprop::calc_error
 ###########################################################
-=pod
-=cut
 
 sub calc_error
 {
@@ -248,7 +245,7 @@ sub hiddenOrInputToHidden
 
 
 			# update the weights from nodes inputting to here
-			my $connectedNodeCounter=0;
+			$connectedNodeCounter=0;
 			foreach my $westNodes (@{$node->{'connectedNodesWest'}->{'nodes'}})
 			{
 				# get the slope from the activation function component

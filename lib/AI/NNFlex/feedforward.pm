@@ -24,16 +24,22 @@
 #					new weight indexing
 #					(arrays) in nnflex 0.16
 #
+# 1.4	20050302	CColbourn	Fixed a problem that allowed
+#					activation to flow even if a
+#					node was lesioned off
+#
+# 1.5	20050308	CColbourn	Made a separate class as part
+#					of NNFlex-0.2
+#
 ##########################################################
 # ToDo
 # ----
 #
-# This needs to implement at least a 'run' method that 
-#  propagates activation through the network from west to 
-#  east.
 #
 ###########################################################
 #
+package AI::NNFlex::feedforward;
+
 use strict;
 
 ##########################################################
@@ -44,9 +50,7 @@ use strict;
 
 =item
 
-This module is the feedforward network type for NNFlex. it
-is included in the NNFlex:: namespace at run time. See documentation
-below for standard methods.
+This module is the feedforward network type for NNFlex. It provides activation flow functions for network types like backprop & momentum.
 
 Copyright (c) 2004-2005 Charles Colbourn. All rights reserved. This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
@@ -60,22 +64,17 @@ it under the same terms as Perl itself.
 ###########################################################
 # AI::NNFlex::feedforward::run
 ###########################################################
-=pod
-
-=head1 AI::NNFlex::feedforward::run
-
-=item
-
-This class contains the run method only. The run method performs
-feedforward  (i.e. west to east) activation flow on the network.
-
-This class is internal to the NNFlex package, and is included
-in the NNFlex namespace by a require on the networktype parameter.
-
-syntax:
- $network->run([0,1,1,1,0,1,1]);
-
-=cut
+#
+#This class contains the run method only. The run method performs
+#feedforward  (i.e. west to east) activation flow on the network.
+#
+#This class is internal to the NNFlex package, and is included
+#in the NNFlex namespace by a require on the networktype parameter.
+#
+#syntax:
+# $network->run([0,1,1,1,0,1,1]);
+#
+#
 ###########################################################
 sub run
 {
@@ -140,7 +139,7 @@ sub run
 
 		foreach my $node (@{$layer->{'nodes'}})
 		{
-
+			my $totalActivation;
 			# Set the node to 0 if not persistent
 			if (!($node->{'persistentactivation'}))
 			{
@@ -162,14 +161,13 @@ sub run
 				{$network->dbug("Weight & activation: $weight - $activation",3);}
 				
 
-				my $totalActivation = $weight*$activation;
-				$node->{'activation'} +=$totalActivation; 
+				$totalActivation += $weight*$activation;
 				$nodeCounter++;	
 			}
 
 			if ($node->{'active'})
 			{
-				my $value = $node->{'activation'};
+				my $value = $totalActivation;
 
 				my $function = $node->{'activationfunction'};
 				my $functionCall ="\$value = \$network->$function(\$value);";

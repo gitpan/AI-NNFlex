@@ -1,16 +1,14 @@
 use strict;
 use Test;
-use AI::NNFlex;
+use AI::NNFlex::momentum;
 use AI::NNFlex::Dataset;
 
 BEGIN{
 	plan tests=>6}
 
 # test create network
-my $network = AI::NNFlex->new(randomconnections=>0,
-				networktype=>'feedforward',
+my $network = AI::NNFlex::momentum->new(randomconnections=>0,
 				randomweights=>1,
-				learningalgorithm=>'momentum',
 				learningrate=>.1,
 				debug=>[],bias=>1,
 				momentum=>0.6);

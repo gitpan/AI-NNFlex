@@ -1,3 +1,79 @@
+0.20
+20050308
+
+v0.17 was never released, as I rejigged the whole lot for
+object inheritance before I got around to uploading it to CPAN.
+Why? I hear you ask, when it worked OK already.
+1) its faster, a lot faster.
+2) feedforward isn't the only kind of network, and I wanted to
+be free to overload some of the methods (especially init) to
+simplify writing a Hopfield module (in progress)
+3) its more theoretically correct
+
+So now, AI::NNFlex is the base class for the other types of 
+networks, and you should never need to call AI::NNFlex class
+directly - you should call the constructor of the subclass, such
+as:
+my $network = AI::NNFlex::momentum->new(params);
+
+The upshot of that is that the network type and learning algorithm
+parameters are now obsolete.
+
+###
+
+Removed draw.pm from the distribution - it really wasn't very useful
+and hadn't been kept up to date with newer revisions of the code. It
+will be put back later (perhaps) or incorporated into a separate GUI
+frontend.
+
+Removed feedforward_pdl.pm from the distribution - it shouldn't have
+been there in the first place!
+
+Fixed the lesion subs so they expect parameter=>value pairs instead
+of an anonymous hash (left over from when I didn't know you could do
+that).
+
+Fixed an error - random weights was bounded by 1, not the parameter
+'randomweights'. Its now positive only. Some benchmarking needed as
+it appears that positive random starting weights rather than a mix
+of positive and negative make the network quicker to converge, at
+least with momentum.
+
+weights now defaults to rand(1) instead of 0 - at least for backprop
+type nets, a default 0 weight will never work. For other types of nets
+the random weights can be overridden with the 'fixedweights' parameter.
+
+Fixed load_state to correctly read weights from the bias node
+
+
+
+
+
+
+#############################################################
+0.17
+2005030x
+
+Implemented a rounding network property in output
+
+Fixed a bug that allowed activation to flow through a node 
+even if it was inactive
+
+Altered the syntax for output to be param=>value instead of
+an anonymous hash
+
+As per Scott Fahlmans comments about neural net benchmarking,
+(Fahlman S.E., (1988) 'An empirical study of learning speed in back-propagation networks'. Tech. Rep. CMU-CS-88-162, Carnegie Mellon University, Pittsburgh, PA.) , I've started using a more realistic benchmark than xor.
+The 'cars' subfolder in examples contains the learning code
+for this, drawn from
+ ftp://ftp.ics.uci.edu/pub/machine-learning-databases/car/
+
+
+
+
+
+#############################################################
+
 0.16
 20050218
 

@@ -85,7 +85,7 @@ sub run
 	my $network = shift;
 	my @outputs;
 	my $counter=0;
-	
+
 	for (my $itemCounter=0;$itemCounter<(scalar @{$self->{'data'}});$itemCounter +=2)
 	{
 		$network->run(@{$self->{'data'}}[$itemCounter]);
@@ -132,6 +132,6 @@ sub learn
 
 	return $error;
 }
-		
+
 1;
 

@@ -3,8 +3,8 @@
 NNFlex - a flexible native perl API for neural networks
 
 Author: Charles Colbourn
-Version: 0.15
-Date: February 2005
+Version: 0.20
+Date: March 2005
 
 NNFLEX is intended to be a flexible framework for
 developing neural network applications. The code is
@@ -56,14 +56,12 @@ will be optional anyway.
 
 Usage:
 
-use AI::NNFlex;
-my $network = AI::NNFlex->new(config item=>value);
+use AI::NNFlex::<networktype>;
+my $network = AI::NNFlex::<networktype>->new(config item=>value);
 
 for example:
-my $network = AI::NNFlex->new(randomconnections=>0,
-				networktype=>'feedforward',
+my $network = AI::NNFlex::momentum->new(randomconnections=>0,
 				randomweights=>1,
-				learningalgorithm=>'momentum',
 				learningrate=>.1,
 				debug=>[3,4],bias=>1,
 				momentum=>0.6);
@@ -145,7 +143,7 @@ another decimal point.
 
 
 VERSION
-0.16
+0.20
 
 ACKNOWLEDGEMENTS
 Phil Brierley, for making his excellent example code
@@ -163,6 +161,9 @@ Dr David Plaut, who gave me unstinting and timely help
 getting Xerion running when I realised this code wasn't
 going to be finished in time for my MSc project.
 
+All the perlmonks at www.perlmonks.org, for teaching me
+all sorts of exciting things about perl, and OO coding, 
+many of which are in this module.
 
 BUGS, FEATURE REQUESTS AND PATCHES
 Please feel free to amend, improve and patch NNFlex to 

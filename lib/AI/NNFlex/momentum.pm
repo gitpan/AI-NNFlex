@@ -15,6 +15,8 @@
 #					indexing to array for
 #					nnflex 0.16
 #
+# 1.3	20050307	CColbourn	packaged as a subclass of NNFLex
+#
 ##########################################################
 # ToDo
 # ----
@@ -22,6 +24,12 @@
 #
 ###########################################################
 #
+
+package AI::NNFlex::momentum;
+use AI::NNFlex;
+use AI::NNFlex::feedforward;
+use base qw(AI::NNFlex::feedforward AI::NNFlex);
+
 use strict;
 
 ###########################################################

@@ -46,20 +46,20 @@ use vars qw ($VERSION);
 # 					array of weights, to make it easier
 # 					to adapt the code to PDL
 #
+# 0.17 20050302		CColbourn	Changed input params to ::output to
+#					be param=>parameter not anon hash
+#					Included round parameter in output
+#
+# 0.20  20050307		CColbourn	Modified for inheritance to simplify
+#					future network types
+#
 ###############################################################################
 # ToDo
 # ====
 #
 # Modify init to allow recurrent layer/node connections
-# De-document node summing for now, as its mathematically equivalent
-#  to node recurrent connections
-# make the dump & load files a bit more intuitive (move the west? node across)
 # write cmd & gui frontends
-# simplifying the input from [{}{}{}]{} to {}{}{}x=>y,z=>1 should allow
-#  the debugging to be simplified and the glabl variable to be removed
 # Speed the bugger up!
-# Revisit the node activation function method code - see if an object
-#  method can be created neatly
 #
 # Odd thought - careful coding of a network would allow grafting of
 # two different network types or learning algorithms, like an effectve
@@ -68,7 +68,7 @@ use vars qw ($VERSION);
 # Clean up the perldocs
 #
 ###############################################################################
-$VERSION = "0.16";
+$VERSION = "0.20";
 
 
 ###############################################################################
@@ -90,13 +90,13 @@ package AI::NNFlex;
 
 =head1 NAME
 
-AI::NNFlex - A customisable neural network simulator
+AI::NNFlex - A base class for implementing neural networks
 
 =head1 SYNOPSIS
 
- use AI::NNFlex;
+ use AI::NNFlex::backprop;
 
- my $network = AI::NNFlex->new(config parameter=>value);
+ my $network = AI::NNFlex::backprop->new(config parameter=>value);
 
  $network->add_layer(nodes=>x,activationfunction=>'function');
 
@@ -128,16 +128,15 @@ AI::NNFlex - A customisable neural network simulator
 
  my $outputsRef = $dataset->run($network);
 
+ my $outputsRef = $network->output(layer=>2,round=>1);
 
 =head1 DESCRIPTION
 
- AI::NNFlex is intended to be a highly flexible, modular NN framework.
- It's written entirely in native perl, so there are essentially no
- prereq's. The following modular divisions are made:
+AI::NNFlex is intended to be a highly flexible, modular NN framework. It's written entirely in native perl, so there are essentially no prereq's. The following modular divisions are made:
 
 	* NNFlex.pm
 		the core module. Contains methods to construct and
-		lesion the network
+		lesion a network
 
 	* feedforward.pm
 		the network type module. Feedforward is the only type
@@ -158,30 +157,21 @@ AI::NNFlex - A customisable neural network simulator
 		methods for constructing a set of input/output data
 		and applying to a network.
 
- The code should be simple enough to use for teaching
- purposes, but a simpler implementation of a simple backprop
- network is included in the example file bp.pl. This is
- derived from Phil Brierleys freely available java code
- at www.philbrierley.com.
+Syntax (as of v0.2) is to call the network type constructor, which typically will inherit most methods from AI::NNFlex. The base class should no longer be called directly.
 
- AI::NNFlex leans towards teaching NN and cognitive modelling
- applications. Future modules are likely to include more
- biologically plausible nets like DeVries & Principes
- Gamma model.
+The code should be simple enough to use for teaching purposes, but a simpler implementation of a simple backprop network is included in the example file bp.pl. This is derived from Phil Brierleys freely available java code at www.philbrierley.com.
+
+AI::NNFlex leans towards teaching NN and cognitive modelling applications. Future modules are likely to include more biologically plausible nets like DeVries & Principes Gamma model.
 
 =head1 CONSTRUCTOR 
 
-=head2 AI::NNFlex
+=head2 AI::NNFlex::<networktype>
 
  new ( parameter => value );
 	
 	randomweights=>MAXIMUM VALUE FOR INITIAL WEIGHT
 
-	learningalgorithm=>The AI::NNFlex module to import for
-		training the net
-
-	networktype=>The AI::NNFlex module to import for flowing
-		activation
+	fixedweights=>WEIGHT TO USE FOR ALL CONNECTIONS
 
 	debug=>[LIST OF CODES FOR MODULES TO DEBUG]
 
@@ -189,26 +179,35 @@ AI::NNFlex - A customisable neural network simulator
 
 	momentum=>the momentum value (momentum learning only)
 
+	round=>0 or 1 - 1 sets the network to round output values to
+		nearest of 1, -1 or 0
+
+Currently, network type subclasses of backprop and momentum are implemented. Hopfield is intended to follow fairly soon.
+
+The following parameters are optional:
+	randomweights
+	fixedweights
+	debug
+	round
+
+(Note, if randomweights is not specified the network will default to a random value from 0 to 1.
+
 =head2 AI::NNFlex::Dataset
 
  new ( [[INPUT VALUES],[OUTPUT VALUES],[INPUT VALUES],[OUTPUT VALUES],..])
 
 =head3 INPUT VALUES
 
- These should be comma separated values. They can be applied
- to the network with ::run or ::learn
+These should be comma separated values. They can be applied to the network with ::run or ::learn
 
 =head3 OUTPUT VALUES
 	
- These are the intended or target output values. Comma separated
- These will be used by ::learn
+These are the intended or target output values. Comma separated. These will be used by ::learn
 
 
 =head1 METHODS
 
- This is a short list of the main methods. For details on all
- available methods, please see individual pod pages below, and
- in individual imported modules.
+This is a short list of the main methods implemented in AI::NNFlex. Subclasses may implement other methods.
 
 =head2 AI::NNFlex
 
@@ -230,8 +229,7 @@ AI::NNFlex - A customisable neural network simulator
 
  $network->init();
 
- Initialises connections between nodes, sets initial weights and
- loads external components
+Initialises connections between nodes, sets initial weights and loads external components. The base AI::NNFlex init method implementes connections backwards and forwards from each node in each layer to each node in the preceeding and following layers. 
 
 =head3 lesion
 
@@ -239,13 +237,11 @@ AI::NNFlex - A customisable neural network simulator
 
  Damages the network.
 
- PROBABILITY
+B<PROBABILITY>
 
- A value between 0 and 1, denoting the probability of a given node
- or connection being damaged.
+A value between 0 and 1, denoting the probability of a given node or connection being damaged.
 
- Note: this method may be called on a per network, per node or per
- layer basis using the appropriate object.
+Note: this method may be called on a per network, per node or per layer basis using the appropriate object.
 
 =head2 AN::NNFlex::Dataset
 
@@ -253,39 +249,33 @@ AI::NNFlex - A customisable neural network simulator
 
  $dataset->learn($network)
 
- 'Teaches' the network the dataset using the networks defined learning
- algorithm.
- Returns sqrError;
+'Teaches' the network the dataset using the networks defined learning algorithm. Returns sqrError;
 
 =head3 run
 
  $dataset->run($network)
 
- Runs the dataset through the network and returns a reference to an array of
- output patterns.
+Runs the dataset through the network and returns a reference to an array of output patterns.
 
 =head1 EXAMPLES
 
- See the code in ./examples. For any given version of NNFlex, xor.pl will
- contain the latest functionality.
+See the code in ./examples. For any given version of NNFlex, xor.pl will contain the latest functionality.
 
 
 =head1 PREREQs
 
- None. NNFlex should run OK on any version of Perl 5 >. 
+None. NNFlex should run OK on any version of Perl 5 >. 
 
 
 =head1 ACKNOWLEDGEMENTS
 
- Phil Brierley, for his excellent free java code, that solved my backprop
- problem
+Phil Brierley, for his excellent free java code, that solved my backprop problem
 
- Dr Martin Le Voi, for help with concepts of NN in the early stages
+Dr Martin Le Voi, for help with concepts of NN in the early stages
 
- Dr David Plaut, for help with the project that this code was originally
- intended for.
+Dr David Plaut, for help with the project that this code was originally intended for.
 
- Graciliano M.Passos for suggestions & improved code (see SEE ALSO).
+Graciliano M.Passos for suggestions & improved code (see SEE ALSO).
 
 =head1 SEE ALSO
 
@@ -306,24 +296,25 @@ AI::NNFlex - A customisable neural network simulator
 
 =head1 CHANGES
 
- v0.11 introduces the lesion method, png support in the draw module
-  and datasets.
- v0.12 fixes a bug in reinforce.pm & adds a reflector in feedforward->run
-  to make $network->run($dataset) work.
- v0.13 introduces the momentum learning algorithm and fixes a bug that
-  allowed training to proceed even if the node activation function module
-  can't be loaded
- v0.14 fixes momentum and backprop so they are no longer nailed to tanh hidden
-  units only.
- v0.15 fixes a bug in feedforward, and reduces the debug overhead
- v0.16 changes some underlying addressing of weights, to simplify and speed  
+v0.11 introduces the lesion method, png support in the draw module and datasets.
+
+v0.12 fixes a bug in reinforce.pm & adds a reflector in feedforward->run to make $network->run($dataset) work.
+
+v0.13 introduces the momentum learning algorithm and fixes a bug that allowed training to proceed even if the node activation function module can't be loaded
+
+v0.14 fixes momentum and backprop so they are no longer nailed to tanh hidden units only.
+
+v0.15 fixes a bug in feedforward, and reduces the debug overhead
+
+v0.16 changes some underlying addressing of weights, to simplify and speed  
+
+v0.17 is a bugfix release, plus some cleaning of UI
+
+v0.20 changes AI::NNFlex to be a base class, and ships three different network types (i.e. training algorithms). Backprop & momentum are both networks of the feedforward class, and inherit their 'run' method from feedforward.pm. 0.20 also fixes a whole raft of bugs and 'not nices'.
 
 =head1 COPYRIGHT
 
- Copyright (c) 2004-2005 Charles Colbourn. All rights reserved. This program
- is free software; you can redistribute it and/or modify it under the same
- terms as Perl itself.
-
+Copyright (c) 2004-2005 Charles Colbourn. All rights reserved. This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 CONTACT
 
@@ -561,15 +552,15 @@ sub add_layer
 sub output
 {
 	my $network = shift;
-	my $params = shift;
+	my %params = @_;
 
 	my $finalLayer = ${$$network{'layers'}}[-1];
 
 	my $outputLayer;
 
-	if (defined $$params{'layer'})
+	if (defined $params{'layer'})
 	{
-		$outputLayer = ${$$network{'layers'}}[$$params{'layer'}]
+		$outputLayer = ${$$network{'layers'}}[$params{'layer'}]
 	}
 	else
 	{
@@ -577,6 +568,28 @@ sub output
 	}
 
 	my $output = AI::NNFlex::layer::layer_output($outputLayer);
+
+
+	# Round outputs if required
+	if ($network->{'round'})
+	{
+		foreach (@$output)
+		{
+			if ($_ > 0.5)
+			{
+				$_ = 1;
+			}
+			elsif ($_ < -0.5)
+			{
+				$_=-1;
+			}
+			else
+			{
+				$_=0;
+			}
+		}
+	}
+
 	return $output;
 }
 ################################################################################
@@ -636,28 +649,41 @@ sub init
 	my $network = shift;
 	my @layers = @{$network->{'layers'}};
 
+	# if network debug state not set, set it to null
+	if (!$network->{'debug'})
+	{
+		$network->{'debug'} = [];
+	}
 	my @debug = @{$network->{'debug'}};
+	
 
+
+	# Network type & training algorithm as parameters are now
+	# removed as part of the 0.2 refactoring. Now training algorithm
+	# /is/ the network type, and inherits from nnflex and eg feedforward
+	#
+	#
 	# one of the parameters will normally be networktype
 	# this specifies a class for activation flow, which
 	# is included here
-	if( $network->{'networktype'})
-	{
-		my $requirestring = "require \"AI/NNFlex/".$network->{'networktype'}.".pm\"";
-		if (!eval($requirestring)){die "Can't load type ".$network->{'networktype'}.".pm because $@\n"};
-	}
-	if( $network->{'learningalgorithm'})
-	{
-		my $requirestring = "require \"AI/NNFlex/".$network->{'learningalgorithm'}.".pm\"";
-		if (!eval($requirestring)){die "Can't load ".$network->{'learningalgorithm'}.".pm because $@\n"};
-	}
+	#if( $network->{'networktype'})
+	#{
+	#	my $requirestring = "require \"AI/NNFlex/".$network->{'networktype'}.".pm\"";
+	#	if (!eval($requirestring)){die "Can't load type ".$network->{'networktype'}.".pm because $@\n"};
+	#}
+	#if( $network->{'learningalgorithm'})
+	#{
+	#	my $requirestring = "require \"AI/NNFlex/".$network->{'learningalgorithm'}.".pm\"";
+	#	if (!eval($requirestring)){die "Can't load ".$network->{'learningalgorithm'}.".pm because $@\n"};
+	#}
 
 	# implement the bias node
 	if ($network->{'bias'})
 	{
 		my $biasNode = AI::NNFlex::node->new({'activation function'=>'linear'});
-		$$network{'biasNode'} = $biasNode;
-		$$network{'biasNode'}->{'activation'} = 1;
+		$$network{'biasnode'} = $biasNode;
+		$$network{'biasnode'}->{'activation'} = 1;
+		$$network{'biasnode'}->{'nodeid'} = "bias";
 	}
 
 	my $nodeid = 1;
@@ -682,14 +708,19 @@ sub init
 						if ($connectionFromWest eq $node)
 						{
 							my $weight;
-							if ($network->{'randomweights'})
+							if ($network->{'fixedweights'})
 							{
-								$weight = rand(2)-1;
+								$weight = $network->{'fixedweights'};
+							}
+							elsif ($network->{'randomweights'})
+							{
+								$weight = rand($network->{'randomweights'});
 							}
 							else
 							{
-								$weight = 0;
+								$weight = rand(1);
 							}
+				
 							push @{$node->{'connectedNodesWest'}->{'nodes'}},$westNodes;
 							push @{$node->{'connectedNodesWest'}->{'weights'}},$weight;
 							if (scalar @debug > 0)	
@@ -707,13 +738,17 @@ sub init
 				if (!$network->{'randomconnections'}  || $network->{'randomconnections'} > rand(1))
 				{
 					my $weight;
-					if ($network->{'randomweights'})
+					if ($network->{'fixedweights'})
 					{
-						$weight = rand(1);
+						$weight = $network->{'fixedweights'};
+					}
+					elsif ($network->{'randomweights'})
+					{
+						$weight = rand($network->{'randomweights'});
 					}
 					else
 					{
-						$weight = 0;
+						$weight = rand(1);
 					}
 					push @{$node->{'connectedNodesEast'}->{'nodes'}},$eastNodes;
 					push @{$node->{'connectedNodesEast'}->{'weights'}}, $weight;
@@ -735,7 +770,7 @@ sub init
 		{
 			foreach my $node (@{$layer->{'nodes'}})
 			{
-				push @{$node->{'connectedNodesWest'}->{'nodes'}},$network->{'biasNode'};
+				push @{$node->{'connectedNodesWest'}->{'nodes'}},$network->{'biasnode'};
 				my $weight;
 				if ($network->{'randomweights'})
 				{
@@ -830,8 +865,6 @@ sub dump_state
 {
 	my $network = shift;
 	my %params =@_;
-	# This needs rewriting. It should include all connection weights, e->w & w->e
-
 
 	my $filename = $params{'filename'};
 	my $activations = $params{'activations'};
@@ -914,6 +947,11 @@ sub load_state
 		}
 	}
 
+	# Add the bias node into the map
+	if ($network->{'bias'})
+	{
+		$nodeMap{'bias'} = $network->{'biasnode'};
+	}
 
 
 	my %stateFromFile;
@@ -968,7 +1006,6 @@ sub load_state
 		}
 	}
 
-
 }
 
 ##############################################################################
@@ -1002,19 +1039,19 @@ sub lesion
 	
         my $network = shift;
 
-        my $params =  shift;
+        my %params =  @_;
 	my $return;
-        $network->dbug("Entered AI::NNFlex::lesion with $params",2);
+        $network->dbug("Entered AI::NNFlex::lesion with %params",2);
 
-        my $nodeLesion = $$params{'nodes'};
-        my $connectionLesion = $$params{'connections'};
+        my $nodeLesion = $params{'nodes'};
+        my $connectionLesion = $params{'connections'};
 
         # go through the layers & node inactivating random nodes according
         # to probability
         
 	foreach my $layer (@{$network->{'layers'}})
 	{
-		$return = $layer->lesion($params);
+		$return = $layer->lesion(%params);
 	}
 
 	return $return;
@@ -1156,19 +1193,19 @@ sub lesion
         
         my $layer = shift;
 
-        my $params =  shift;
+        my %params =  @_;
         my $return;
 
 
-        my $nodeLesion = $$params{'nodes'};
-        my $connectionLesion = $$params{'connections'};
+        my $nodeLesion = $params{'nodes'};
+        my $connectionLesion = $params{'connections'};
 
         # go through the layers & node inactivating random nodes according
         # to probability
         
         foreach my $node (@{$layer->{'nodes'}})
         {
-                $return = $node->lesion($params);
+                $return = $node->lesion(%params);
         }
 
         return $return;
@@ -1301,11 +1338,11 @@ sub lesion
 
         my $node = shift;
 
-        my $params =  shift;
+        my %params =  @_;
 
 
-        my $nodeLesion = $$params{'nodes'};
-        my $connectionLesion = $$params{'connections'};
+        my $nodeLesion = $params{'nodes'};
+        my $connectionLesion = $params{'connections'};
 
         # go through the layers & node inactivating random nodes according
         # to probability
