@@ -46,4 +46,13 @@ sub linear
 	return $value;
 }
 
+sub linear_slope
+{
+	my $network = shift;
+	my $value = shift;
+	$network->dbug("Linear slope returning $value",5);
+	return $value;
+}
+
+
 1;

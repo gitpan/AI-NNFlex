@@ -10,6 +10,8 @@
 # 1.0	20041018	CColbourn	New module
 # 1.1	20050116	CColbourn	added dataset translater
 #					to ::learn
+# 1.2	20050201	CColbourn	Inseted call to activation
+#					slope function
 #
 ##########################################################
 # ToDo
@@ -89,7 +91,7 @@ sub calc_error
 	foreach (@$outputLayer)
 	{	
 		my $value = $_->{'activation'} - $outputPattern[$counter];
-		#eval ($_->{'activation function code'});
+		
 		$_->{'error'} = $value;
 		$counter++;
 		$network->dbug ("Error on output node $_ = ".$_->{'error'},4);
@@ -172,16 +174,11 @@ sub hiddenToOutput
 	{
 		foreach my $connectedNode (@{$node->{'connectedNodesWest'}->{'nodes'}})
 		{
-			$network->dbug("Learning rate is ".$network->{'learning rate'},4);
-			my $deltaW = (($network->{'learning rate'}) * ($node->{'error'}) * ($connectedNode->{'activation'}));
+			$network->dbug("Learning rate is ".$network->{'learningrate'},4);
+			my $deltaW = (($network->{'learningrate'}) * ($node->{'error'}) * ($connectedNode->{'activation'}));
 			$network->dbug("Applying delta $deltaW on hiddenToOutput $connectedNode to $node",4);
 			# 
 			$node->{'connectedNodesWest'}->{'weights'}->{$connectedNode} -= $deltaW;
-			# not sure why this is necessary, but its taken from PB's code
-			if ($node->{'connectedNodesWest'}->{'weights'}->{'connectedNode'} > 5)
-				{$node->{'connectedNodesWest'}->{'weights'}->{'connectedNode'} = 5}
-			if ($node->{'connectedNodesWest'}->{'weights'}->{'connectedNode'} < -5)
-				{$node->{'connectedNodesWest'}->{'weights'}->{'connectedNode'} = -5}
 				
 		}
 	}
@@ -240,10 +237,13 @@ sub hiddenOrInputToHidden
 			# update the weights from nodes inputting to here
 			foreach my $westNodes (@{$node->{'connectedNodesWest'}->{'nodes'}})
 			{
-				# This also taken from PB's code
-				my $value = 1- ($node->{'activation'} * $node->{'activation'});
-				$value = $value * $node->{'error'} * $network->{'learning rate'} * $westNodes->{'activation'};
-				#eval($node->{'activation function code'});
+				# get the slope from the activation function component
+				my $value = $node->{'activation'};
+				my $slope = $node->{'activationfunction'}."_slope";
+				my $evalstring = "\$value = \$network->$slope(\$value);";
+				eval($evalstring);
+
+				$value = $value * $node->{'error'} * $network->{'learningrate'} * $westNodes->{'activation'};
 				
 				my $dW = $value;
 				$network->dbug("Applying deltaW $dW to inputToHidden connection from $westNodes to $node",4);
@@ -295,7 +295,7 @@ sub RMSErr
 	foreach (@$outputLayer)
 	{	
 		my $value = $_->{'activation'} - $outputPattern[$counter];
-		#eval ($_->{'activation function code'});
+
 		$sqrErr += $value *$value;
 		$counter++;
 		$network->dbug("Error on output node $_ = ".$_->{'error'},4);

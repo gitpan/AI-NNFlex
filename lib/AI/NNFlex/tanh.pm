@@ -32,6 +32,13 @@ syntax:
 
         my $value = $network->tanh(<value>);
 
+
+You also need the 'slope' (i.e. you need to integrate the
+activation function) and supply that as <function>_slope. 
+See below if you are writing your own activation functions.
+
+
+
 Copyright (c) 2004-2005 Charles Colbourn. All rights reserved. This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
@@ -57,5 +64,16 @@ sub tanh
 	$network->dbug("Tanh activation returning $value",5);	
 	return $value;
 }
+
+sub tanh_slope
+{
+	my $network = shift;
+	my $value = shift;
+	my $return = 1-($value*$value);
+	$network->dbug("Tanh_slope returning $value",5);
+	return $return;
+}
+
+
 
 1;

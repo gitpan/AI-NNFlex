@@ -7,6 +7,9 @@
 # ========
 #
 # 1.0	20050121	CColbourn	New module
+# 1.1	20050201	CColbourn	Added call to activation
+#					function slope instead
+#					of hardcoded 1-y*y
 #
 ##########################################################
 # ToDo
@@ -185,8 +188,8 @@ sub hiddenToOutput
 				$momentum = ($network->{'momentum'})*($node->{'connectedNodesWest'}->{'lastdelta'}->{$connectedNode});
 			}
 
-			$network->dbug("Learning rate is ".$network->{'learning rate'},4);
-			my $deltaW = (($network->{'learning rate'}) * ($node->{'error'}) * ($connectedNode->{'activation'}));
+			$network->dbug("Learning rate is ".$network->{'learningrate'},4);
+			my $deltaW = (($network->{'learningrate'}) * ($node->{'error'}) * ($connectedNode->{'activation'}));
 			$deltaW = $deltaW+$momentum;
 			$node->{'connectedNodesWest'}->{'lastdelta'}->{$connectedNode} = $deltaW;
 			
@@ -194,13 +197,8 @@ sub hiddenToOutput
 			$network->dbug("Applying delta $deltaW on hiddenToOutput $connectedNode to $node",4);
 			# 
 			$node->{'connectedNodesWest'}->{'weights'}->{$connectedNode} -= $deltaW;
-			# not sure why this is necessary, but its taken from PB's code
-			if ($node->{'connectedNodesWest'}->{'weights'}->{'connectedNode'} > 5)
-				{$node->{'connectedNodesWest'}->{'weights'}->{'connectedNode'} = 5}
-			if ($node->{'connectedNodesWest'}->{'weights'}->{'connectedNode'} < -5)
-				{$node->{'connectedNodesWest'}->{'weights'}->{'connectedNode'} = -5}
-				
 		}
+			
 	}
 }
 
@@ -264,11 +262,14 @@ sub hiddenOrInputToHidden
 					$momentum = ($network->{'momentum'})*($node->{'connectedNodesWest'}->{'lastdelta'}->{$westNodes});
 				}
 
+				# get the slope from the activation function component
+				my $value = $node->{'activation'};
+				my $evalstring = "\$value = \$network->".$node->{'activationfunction'}."_slope(\$value);";
+				eval($evalstring);
 
-				# This also taken from PB's code - think its the slope of tanh
-				my $value = 1- ($node->{'activation'} * $node->{'activation'});
-				$value = $value * $node->{'error'} * $network->{'learning rate'} * $westNodes->{'activation'};
-				#eval($node->{'activation function code'});
+
+				$value = $value * $node->{'error'} * $network->{'learningrate'} * $westNodes->{'activation'};
+
 				
 				my $dW = $value;
 				$dW = $dW + $momentum;
@@ -324,7 +325,7 @@ sub RMSErr
 	foreach (@$outputLayer)
 	{	
 		my $value = $_->{'activation'} - $outputPattern[$counter];
-		#eval ($_->{'activation function code'});
+
 		$sqrErr += $value *$value;
 		$counter++;
 		$network->dbug("Error on output node $_ = ".$_->{'error'},4);

@@ -84,7 +84,7 @@ sub run
 	my $self = shift;
 	my $network = shift;
 	my @outputs;
-	my $counter;
+	my $counter=0;
 	
 	for (my $itemCounter=0;$itemCounter<(scalar @{$self->{'data'}});$itemCounter +=2)
 	{

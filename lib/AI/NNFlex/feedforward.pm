@@ -103,7 +103,7 @@ sub run
 		if ($_->{'active'})
 		{
 
-			if ($_->{'persistent activation'})
+			if ($_->{'persistentactivation'})
 			{
 				$_->{'activation'} +=$inputPattern[$counter];
 				$network->dbug("Applying ".$inputPattern[$counter]." to $_",3);
@@ -127,7 +127,7 @@ sub run
 		foreach my $node (@{$layer->{'nodes'}})
 		{
 
-			if (!($node->{'persistent activation'}))
+			if (!($node->{'persistentactivation'}))
 			{
 				$node->{'activation'} =0;
 			}
@@ -146,7 +146,7 @@ sub run
 
 				my $totalActivation = $weight*$activation;
 				#my $value = $totalActivation;
-				my $function = $node->{'activation function'};
+				my $function = $node->{'activationfunction'};
 				my $functionCall ="\$totalActivation = \$network->$function(\$totalActivation);";
 				eval($functionCall);
 				$node->{'activation'} +=$totalActivation; 
@@ -156,8 +156,8 @@ sub run
 			if ($node->{'active'})
 			{
 				my $value = $node->{'activation'};
-				#eval($node->{'activation function code'});
-				my $function = $node->{'activation function'};
+
+				my $function = $node->{'activationfunction'};
 				my $functionCall ="\$value = \$network->$function(\$value);";
 
 				eval($functionCall);

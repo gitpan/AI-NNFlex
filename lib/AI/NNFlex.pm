@@ -11,7 +11,6 @@ use vars qw ($VERSION);
 # The basis of the approach for this version is a very flexible, modular
 # set of packages. This package constitutes the base, allowing the modeller
 # to create meshes, apply input, and read output ONLY!
-# (oh, and maybe lesion - CWC)
 #
 # Separate modules are to be written to perform feedback adjustments,
 # various activation functions, text/gui front ends etc
@@ -34,6 +33,10 @@ use vars qw ($VERSION);
 #
 # 0.13 20050121		CColbourn	Created momentum learning module
 #
+# 0.14 20050201		CColbourn	Abstracted derivatiive of activation
+#					function into a separate function call
+#					instead of hardcoded 1-y*y in backprop
+#					tanh, linear & momentum
 ###############################################################################
 # ToDo
 # ====
@@ -53,13 +56,10 @@ use vars qw ($VERSION);
 # two different network types or learning algorithms, like an effectve
 # single network with 2 layers unsupervised and 2 layers supervised
 #
-# an experimental training algorithm - strengthen any active connection only
-# (and weaken inactive connections). 
-#
 # Clean up the perldocs
 #
 ###############################################################################
-$VERSION = "0.13";
+$VERSION = "0.14";
 
 
 ###############################################################################
@@ -85,36 +85,42 @@ AI::NNFlex - A customisable neural network simulator
 
 =head1 SYNOPSIS
 
-use AI::NNFlex;
+ use AI::NNFlex;
 
-my $network = AI::NNFlex->new([array of hashes],{hash of global config});
+ my $network = AI::NNFlex->new(config parameter=>value);
 
-use AI::NNFlex::Dataset;
+ $network->add_layer(nodes=>x,activationfunction=>'function');
 
-my $dataset = AI::NNFlex::Dataset->new([
+ $network->init(); 
+
+
+
+ use AI::NNFlex::Dataset;
+
+ my $dataset = AI::NNFlex::Dataset->new([
 			[INPUTARRAY],[TARGETOUTPUT],
 			[INPUTARRAY],[TARGETOUTPUT]]);
 
-my $sqrError = 10;
+ my $sqrError = 10;
 
-while ($sqrError >0.01)
+ while ($sqrError >0.01)
 
-{
+ {
 
 	$sqrError = $dataset->learn($network);
 
-}
+ }
 
-$network->lesion({'nodes'=>PROBABILITY,'connections'=>PROBABILITY});
+ $network->lesion({'nodes'=>PROBABILITY,'connections'=>PROBABILITY});
 
-my $outputsRef = $dataset->run($network);
+ my $outputsRef = $dataset->run($network);
 
 
 =head1 DESCRIPTION
 
-AI::NNFlex is intended to be a highly flexible, modular NN framework.
-It's written entirely in native perl, so there are essentially no
-prereq's. The following modular divisions are made:
+ AI::NNFlex is intended to be a highly flexible, modular NN framework.
+ It's written entirely in native perl, so there are essentially no
+ prereq's. The following modular divisions are made:
 
 	* NNFlex.pm
 		the core module. Contains methods to construct and
@@ -125,10 +131,11 @@ prereq's. The following modular divisions are made:
 		currently defined, but others may be created and
 		imported at runtime
 
-	* backprop.pm
-		the learning algorithm. Backprop is the only algorithm
-		currently defined, but others may be created and 
-		imported at runtime
+	* <learning>.pm
+		the learning algorithm. Currently the options are
+			backprop - standard vanilla backprop
+			momentum - backprop with momentum
+
 
 	* <activation>.pm
 		node activation function. Currently the options are
@@ -138,44 +145,26 @@ prereq's. The following modular divisions are made:
 		methods for constructing a set of input/output data
 		and applying to a network.
 
-The code should be simple enough to use for teaching
-purposes, but a simpler implementation of a simple backprop
-network is included in the example file bp.pl. This is
-derived from Phil Brierleys freely available java code
-at www.philbrierley.com.
+ The code should be simple enough to use for teaching
+ purposes, but a simpler implementation of a simple backprop
+ network is included in the example file bp.pl. This is
+ derived from Phil Brierleys freely available java code
+ at www.philbrierley.com.
 
-AI::NNFlex leans towards teaching NN and cognitive modelling
-applications. Future modules are likely to include more biologically plausible
-nets like DeVries & Principes Gamma model.
+ AI::NNFlex leans towards teaching NN and cognitive modelling
+ applications. Future modules are likely to include more
+ biologically plausible nets like DeVries & Principes
+ Gamma model.
 
 =head1 CONSTRUCTOR 
 
 =head2 AI::NNFlex
 
-new ( { HASH OF NETWORK STRUCTURE },{ HASH OF CONFIG OPTIONS });
-
-=head3 network structure
-
-This should contain sub-hashes for each layer in the network,
-containing the following options.
-
-	nodes=>NUMBER OF NODES
-
-	decay=>AMOUNT OF ACTIVATION TO DECAY PER TICK
-
-	persistent activation=>TRUE TO RETAIN ACTIVATION BETWEEN
-				TICKS
-
-	random activation=>MAXIMUM VALUE FOR INITIAL ACTIVATION
+ new ( parameter => value );
 	
-=head3 config options
+	randomweights=>MAXIMUM VALUE FOR INITIAL WEIGHT
 
-This should contain the global config options for the net.
-The following are defined:
-	
-	random weights=>MAXIMUM VALUE FOR INITIAL WEIGHT
-
-	learning algorithm=>The AI::NNFlex module to import for
+	learningalgorithm=>The AI::NNFlex module to import for
 		training the net
 
 	networktype=>The AI::NNFlex module to import for flowing
@@ -183,108 +172,147 @@ The following are defined:
 
 	debug=>[LIST OF CODES FOR MODULES TO DEBUG]
 
+	learningrate=>the learning rate of the network
+
+	momentum=>the momentum value (momentum learning only)
+
 =head2 AI::NNFlex::Dataset
 
-new ( [[INPUT VALUES],[OUTPUT VALUES],[INPUT VALUES],[OUTPUT VALUES],..])
+ new ( [[INPUT VALUES],[OUTPUT VALUES],[INPUT VALUES],[OUTPUT VALUES],..])
 
 =head3 INPUT VALUES
 
-These should be comma separated values. They can be applied
-to the network with ::run or ::learn
+ These should be comma separated values. They can be applied
+ to the network with ::run or ::learn
 
 =head3 OUTPUT VALUES
 	
-These are the intended or target output values. Comma separated
-These will be used by ::learn
+ These are the intended or target output values. Comma separated
+ These will be used by ::learn
 
 
 =head1 METHODS
 
-This is a short list of the main methods. For details on all
-available methods, please see individual pod pages below, and
-in individual imported modules.
+ This is a short list of the main methods. For details on all
+ available methods, please see individual pod pages below, and
+ in individual imported modules.
 
 =head2 AI::NNFlex
 
+=head3 add_layer
+
+ Syntax:
+
+ $network->add_layer(	nodes=>NUMBER OF NODES IN LAYER,
+			persistentactivation=>RETAIN ACTIVATION BETWEEN PASSES,
+			decay=>RATE OF ACTIVATION DECAY PER PASS,
+			randomactivation=>MAXIMUM STARTING ACTIVATION,
+			threshold=>NYI,
+			activationfunction=>"ACTIVATION FUNCTION",
+			randomweights=>MAX VALUE OF STARTING WEIGHTS);
+
+=head3 init
+
+ Syntax:
+
+ $network->init();
+
+ Initialises connections between nodes, sets initial weights and
+ loads external components
+
 =head3 lesion
 
-$network->lesion ({'nodes'=>PROBABILITY,'connections'=>PROBABILITY})
+ $network->lesion ({'nodes'=>PROBABILITY,'connections'=>PROBABILITY})
 
-Damages the network.
+ Damages the network.
 
-PROBABILITY
+ PROBABILITY
 
-A value between 0 and 1, denoting the probability of a given node or connection being damaged.
+ A value between 0 and 1, denoting the probability of a given node
+ or connection being damaged.
 
-Note: this method may be called on a per network, per node or per layer basis using the appropriate object.
+ Note: this method may be called on a per network, per node or per
+ layer basis using the appropriate object.
 
 =head2 AN::NNFlex::Dataset
 
 =head3 learn
 
-$dataset->learn($network)
+ $dataset->learn($network)
 
-'Teaches' the network the dataset using the networks defined learning algorithm.
-Returns sqrError;
+ 'Teaches' the network the dataset using the networks defined learning
+ algorithm.
+ Returns sqrError;
 
 =head3 run
 
-$dataset->run($network)
+ $dataset->run($network)
 
-Runs the dataset through the network and returns a reference to an array of
-output patterns.
+ Runs the dataset through the network and returns a reference to an array of
+ output patterns.
 
 =head1 EXAMPLES
 
-See the code in ./examples. For the simplest example, see xor_with_datasets.pl
+ See the code in ./examples. For any given version of NNFlex, xor.pl will
+ contain the latest functionality.
+
+
+=head1 PREREQs
+
+ None. NNFlex should run OK on any version of Perl 5 >. 
+
 
 =head1 ACKNOWLEDGEMENTS
 
-Phil Brierley, for his excellent free java code, that solved my backprop problem
+ Phil Brierley, for his excellent free java code, that solved my backprop
+ problem
 
-Dr Martin Le Voi, for help with concepts of NN in the early stages
+ Dr Martin Le Voi, for help with concepts of NN in the early stages
 
-Dr David Plaut, for help with the project that this code was originally intended for.
+ Dr David Plaut, for help with the project that this code was originally
+ intended for.
 
-Graciliano M.Passos for suggestions & improved code (see SEE ALSO).
+ Graciliano M.Passos for suggestions & improved code (see SEE ALSO).
 
 =head1 SEE ALSO
 
-AI::NNEasy - Developed by Graciliano M.Passos 
-Shares some common code with NNFlex. Much faster, and more suitable for backprop projects with large datasets.
+ AI::NNEasy - Developed by Graciliano M.Passos 
+ Shares some common code with NNFlex. Much faster, and more suitable for
+ backprop projects with large datasets.
 
 =head1 TODO
 
-Lots of things:
+ Lots of things:
 
-clean up the perldocs some more
-
-write gamma modules
-
-write BPTT modules
-
-write a perceptron learning module
-
-speed it up
-
-write a tk gui
+ clean up the perldocs some more
+ write gamma modules
+ write BPTT modules
+ write a perceptron learning module
+ speed it up
+ write a tk gui
 
 =head1 CHANGES
 
-v0.11 introduces the lesion method, png support in the draw module and datasets.
-v0.12 fixes a bug in reinforce.pm & adds a reflector in feedforward->run to make
-$network->run($dataset) work.
-v0.13 introduces the momentum learning algorithm and fixes a bug that allowed
-training to proceed even if the node activation function module can't be loaded
+ v0.11 introduces the lesion method, png support in the draw module
+  and datasets.
+ v0.12 fixes a bug in reinforce.pm & adds a reflector in feedforward->run
+  to make $network->run($dataset) work.
+ v0.13 introduces the momentum learning algorithm and fixes a bug that
+  allowed training to proceed even if the node activation function module
+  can't be loaded
+ v0.14 fixes momentum and backprop so they are no longer nailed to tanh hidden
+  units only.
 
 =head1 COPYRIGHT
 
-Copyright (c) 2004-2005 Charles Colbourn. All rights reserved. This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+ Copyright (c) 2004-2005 Charles Colbourn. All rights reserved. This program
+ is free software; you can redistribute it and/or modify it under the same
+ terms as Perl itself.
 
 
 =head1 CONTACT
 
-charlesc@nnflex.g0n.net
+ charlesc@nnflex.g0n.net
 
 
 
@@ -299,89 +327,89 @@ charlesc@nnflex.g0n.net
 # AI::NNFlex::new
 ###############################################################################
 
-=pod
-
-Below are PODs for individual methods
-
-
-=head1 AI::NNFlex::new
-
-=head2 constructor - creates new neural network
-
-takes as params a reference to a hash. Each hash will be created as a layer.
-
-Valid parameters are currently:
-
-	* nodes			-	number of nodes in the layer
-
-	* decay			-	float, amount that each node in the
-					layer will decay with each tick.
-
-	* persistent activation -	whether activation is summed between
-					ticks.
-
-	* adjust error		-	<NYI>
-
-	* random activation	-	parameter to pass to RAND for random
-					activation seeding
-
-	Additional parameters may be specified as individual param=>value pairs
-	AFTER the layer hash. These may include:
-
-	* random weights	-	parameter to pass to RAND for random
-					weights seeding
-	
-	* random connections	-	The /probability/ factor of a connection
-					being made between two nodes in the
-					network.
-
-					(Note that no support exists at present
-					for restricting the connectivity at a
-					layer by layer level, although this may
-					be done by combining two or more network
-					objects and handling activation from one
-					to the next programmatically)
-
-	* learning algorithm	-	the learning algorithm (this must be a
-					valid compatible perl module).
-
-	* networktype		-	E.g. feedforward. Must be a compatible
-					perl module.
-
-	* debug			-	level of debug information
-					a different debug level is assigned to
-					each module type, and the debug property is
-					an ARRAY of which debugs you require.
-					0 - error
-					1 - TBD
-					2 - NNFlex.pm core debug
-					3 - networktype debug
-					4 - learning algorithm debug
-					5 - activation function debug
-					6 - GUI/Graphic
-
-Plus other custom settings used in networktype & learning algorithm modules, such as:
-
-	* learning rate		-	A constant for use in e.g. backprop learning
-
-
-
-Returns a network object that contains $$network->{'layers'}
-which is an array of 'layer' objects. 
-
-The layer object contains a property 'nodes' which is an array of nodes
-in that layer. So programmatically if you want to access a particular
-node (or to interact with the mesh for writing networktypes and learning
-algorithms) you can access any node directly using the syntax
-
-$network->{'layers'}->[layer number]->{'nodes'}->[node number]->{property}
-
-(HINT: or do foreach's on the arrays)
-
-Copyright (c) 2004-2005 Charles Colbourn. All rights reserved. This program is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-=cut
+#=pod
+#
+#Below are PODs for individual methods
+#
+#
+#=head1 AI::NNFlex::new
+#
+#=head2 constructor - creates new neural network
+#
+#takes as params a reference to a hash. Each hash will be created as a layer.
+#
+#Valid parameters are currently:
+#
+#	* nodes			-	number of nodes in the layer
+#
+#	* decay			-	float, amount that each node in the
+#					layer will decay with each tick.
+#
+#	* persistentactivation -	whether activation is summed between
+#					ticks.
+#
+#	* adjusterror		-	<NYI>
+#
+#	* randomactivation	-	parameter to pass to RAND for random
+#					activation seeding
+#
+#	Additional parameters may be specified as individual param=>value pairs
+#	AFTER the layer hash. These may include:
+#
+#	* randomweights	-	parameter to pass to RAND for random
+#					weights seeding
+#	
+#	* randomconnections	-	The /probability/ factor of a connection
+#					being made between two nodes in the
+#					network.
+#
+#					(Note that no support exists at present
+#					for restricting the connectivity at a
+#					layer by layer level, although this may
+#					be done by combining two or more network
+#					objects and handling activation from one
+#					to the next programmatically)
+#
+#	* learningalgorithm	-	the learning algorithm (this must be a
+#					valid compatible perl module).
+#
+#	* networktype		-	E.g. feedforward. Must be a compatible
+#					perl module.
+#
+#	* debug			-	level of debug information
+#					a different debug level is assigned to
+#					each module type, and the debug property is
+#					an ARRAY of which debugs you require.
+#					0 - error
+#					1 - TBD
+#					2 - NNFlex.pm core debug
+#					3 - networktype debug
+#					4 - learning algorithm debug
+#					5 - activation function debug
+#					6 - GUI/Graphic
+#
+#Plus other custom settings used in networktype & learning algorithm modules, such as:
+#
+#	* learning rate		-	A constant for use in e.g. backprop learning
+#
+#
+#
+#Returns a network object that contains $$network->{'layers'}
+#which is an array of 'layer' objects. 
+#
+#The layer object contains a property 'nodes' which is an array of nodes
+#in that layer. So programmatically if you want to access a particular
+#node (or to interact with the mesh for writing networktypes and learning
+#algorithms) you can access any node directly using the syntax
+#
+#$network->{'layers'}->[layer number]->{'nodes'}->[node number]->{property}
+#
+#(HINT: or do foreach's on the arrays)
+#
+#Copyright (c) 2004-2005 Charles Colbourn. All rights reserved. This program is free software; you can redistribute it and/or modify
+#it under the same terms as Perl itself.
+#
+##=cut
 
 ###############################################################################
 sub new
@@ -390,37 +418,63 @@ sub new
 	my $network={};
 	bless $network,$class;
 
+	# intercept the new style 'empty network' constructor call
+	# Maybe I should deprecate the old one, but its convenient, provided you
+	# can follow the mess of hashes
+	
+	if (!grep /HASH/,@_)
+	{
+		my %config = @_;
+		foreach (keys %config)
+		{
+			$network->{$_} = $config{$_};
+		}
+
+		return $network;
+	}
+
+	# Otherwise, continue assuming that the whole network is defined in 
+	# a pair of anonymous hashes	
+
+
+
 	my $params = shift;
 	my $netParams = shift;
 	my @layers;
 	dbug ($netParams,"Entered AI::NNFlex::new with params $params $netParams",2);
 
+
+	# clean up case & spaces in layer defs from pre 0.14 constructor calls:
+	my $cleanParams;
+	foreach my $layer(@{$params})
+	{
+		my %cleanLayer;
+		foreach (keys %$layer)
+		{
+			my $key = lc($_);
+			$key =~ s/\s//g;
+			$cleanLayer{$key} = $$layer{$_};
+		}
+		push @$cleanParams,\%cleanLayer;
+	}
+
+
+
 	# Network wide parameters (e.g. random weights)
 	foreach (keys %$netParams)
 	{
-		$network->{$_} = ${$netParams}{$_};
+		my $key = lc($_);
+		$key =~ s/\s//g; # up to 0.14 we had params with spaces in, now deprecated
+		$network->{$key} = ${$netParams}{$_};
 	}
 
-	# one of the parameters will normally be networktype
-	# this specifies a class for activation flow, which
-	# is included here
-	if( $network->{'networktype'})
-	{
-		my $requirestring = "require \"AI/NNFlex/".$network->{'networktype'}.".pm\"";
-		if (!eval($requirestring)){die "Can't load ".$network->{'networktype'}.".pm\n"};
-	}
-	if( $network->{'learning algorithm'})
-	{
-		my $requirestring = "require \"AI/NNFlex/".$network->{'learning algorithm'}.".pm\"";
-		if (!eval($requirestring)){die "Can't load ".$network->{'learning algorithm'}.".pm\n"};
-	}
 	if( $network->{'debug'})
 	{
 		@DEBUG = @{$network->{'debug'}};
 	}
 
 	# build the network
-	foreach (@$params)
+	foreach (@$cleanParams)
 	{
 		if (!($$_{'nodes'})){next}
 		my %layer = %{$_};	
@@ -429,14 +483,6 @@ sub new
 	$$network{'layers'} = \@layers;
 
 
-	# implement the bias node
-
-	if ($network->{'bias'})
-	{
-		my $biasNode = AI::NNFlex::node->new({'activation function'=>'linear'});
-		$$network{'biasNode'} = $biasNode;
-		$$network{'biasNode'}->{'activation'} = 1;
-	}
 
 
 
@@ -445,20 +491,56 @@ sub new
 }
 
 
+
+
+###############################################################################
+# AI::NNFlex::add_layer
+###############################################################################
+#
+# Adds a layer of given node definitions to the $network object
+#
+# syntax
+#
+# $network->add_layer(nodes=>4,activationfunction=>tanh);
+#
+# returns bool success or failure
+#
+###############################################################################
+
+sub add_layer
+{
+	my $network = shift;
+
+	my %config = @_;
+
+	my $layer = AI::NNFlex::layer->new(\%config);
+
+	if ($layer)
+	{
+		push @{$network->{'layers'}},$layer;
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+
 ###############################################################################
 # AI::NNFlex::output
 ###############################################################################
-=head 
-
-=head1 AI::NNFlex::output
-
-
-$object->output({"output"=>"1"}); returns the activation of layer 1
-
-
-else returns activation of last layer as a reference to an array
-
-=cut
+#=pod 
+#
+#=head1 AI::NNFlex::output
+#
+#
+#$object->output({"output"=>"1"}); returns the activation of layer 1
+#
+#
+#else returns activation of last layer as a reference to an array
+#
+##=cut
 
 ###############################################################################
 sub output
@@ -486,49 +568,49 @@ sub output
 # sub init
 ################################################################################
 
-=pod
-
-=head1 AI::NNFlex::init
-
-
-
-called from AI::NNFlex::new. no external use required, but not defined as local, in case of debugging use
-
-Init runs through each layer of node objects, creating properties in each node:
-
-	* connectedNodesEast	-	Nodes connected to this node in the layer
-					to the 'east', i.e. next layer in feedforward
-					terms.
-
-	* connectedNodesWest	-	Nodes connected to this node in the layer to
-					the west, i.e. previous layer in feedforward
-					networks.
-
-These properties are hashes, with the node object acting as a key. Each value
-is a weight for this connection. This means that you /can/ have connection weights
-for connections in both directions, since the weight is associated with an incoming
-connection.
-
-access with the following syntax:
-
-$node->{'connectedNodesWest'}->{'weights'}->{$connectedNode} = 0.12345
-$node->{'connectedNodesWest'}->{'nodes'}->[number] = $nodeObject
-
-
-Note also that the probability of a connection being created is equal to the numeric 
-value of the global property 'random connections' expressed as a decimal between 0 and 1.
-If 'random connections' is not specified all connections will be made.
-
-The connections are /only/ created from west to east. Connections that already exist from
-west to east are just copied for the 'connectedNodesWest' property.
-
-No return value: the connections are created in the $network object.
-
-
-These connectedNodesEast & West are handy, because they are arrays you can foreach
-them to iterate through the connected nodes in a layer to the east or west.
-
-=cut
+#=pod
+#
+#=head1 AI::NNFlex::init
+#
+#
+#
+#called from AI::NNFlex::new. no external use required, but not defined as local, in case of debugging use
+#
+#Init runs through each layer of node objects, creating properties in each node:
+#
+#	* connectedNodesEast	-	Nodes connected to this node in the layer
+#					to the 'east', i.e. next layer in feedforward
+#					terms.
+#
+#	* connectedNodesWest	-	Nodes connected to this node in the layer to
+#					the west, i.e. previous layer in feedforward
+#					networks.
+#
+#These properties are hashes, with the node object acting as a key. Each value
+#is a weight for this connection. This means that you /can/ have connection weights
+#for connections in both directions, since the weight is associated with an incoming
+#connection.
+#
+#access with the following syntax:
+#
+#$node->{'connectedNodesWest'}->{'weights'}->{$connectedNode} = 0.12345
+#$node->{'connectedNodesWest'}->{'nodes'}->[number] = $nodeObject
+#
+#
+#Note also that the probability of a connection being created is equal to the numeric 
+#value of the global property 'random connections' expressed as a decimal between 0 and 1.
+#If 'random connections' is not specified all connections will be made.
+#
+#The connections are /only/ created from west to east. Connections that already exist from
+#west to east are just copied for the 'connectedNodesWest' property.
+#
+#No return value: the connections are created in the $network object.
+#
+#
+#These connectedNodesEast & West are handy, because they are arrays you can foreach
+#them to iterate through the connected nodes in a layer to the east or west.
+#
+##=cut
 
 ###############################################################################
 sub init
@@ -539,8 +621,29 @@ sub init
 	my $network = shift;
 	my @layers = @{$network->{'layers'}};
 
+	# one of the parameters will normally be networktype
+	# this specifies a class for activation flow, which
+	# is included here
+	if( $network->{'networktype'})
+	{
+		my $requirestring = "require \"AI/NNFlex/".$network->{'networktype'}.".pm\"";
+		if (!eval($requirestring)){die "Can't load type ".$network->{'networktype'}.".pm\n"};
+	}
+	if( $network->{'learningalgorithm'})
+	{
+		my $requirestring = "require \"AI/NNFlex/".$network->{'learningalgorithm'}.".pm\"";
+		if (!eval($requirestring)){die "Can't load ".$network->{'learningalgorithm'}.".pm\n"};
+	}
+	# implement the bias node
+	if ($network->{'bias'})
+	{
+		my $biasNode = AI::NNFlex::node->new({'activation function'=>'linear'});
+		$$network{'biasNode'} = $biasNode;
+		$$network{'biasNode'}->{'activation'} = 1;
+	}
+
 	my $nodeid = 1;
-	my $currentLayer;	
+	my $currentLayer=0;	
 	# foreach layer, we need to examine each node
 	foreach my $layer (@layers)
 	{
@@ -548,8 +651,8 @@ sub init
 		foreach my $node (@{$layer->{'nodes'}})
 		{
 			# import the nodes activation function
-			my $requireString = "require (\"AI/NNFlex/".$node->{'activation function'}.".pm\")";
-			if (!eval ($requireString)){die "Can't load ".$node->{'activation function'}.".pm\n"};
+			my $requireString = "require (\"AI/NNFlex/".$node->{'activationfunction'}.".pm\")";
+			if (!eval ($requireString)){die "Can't load activation function ".$node->{'activationfunction'}.".pm\n"};
 			$node->{'nodeid'} = $nodeid;
 			# only initialise to the west if layer > 0
 			if ($currentLayer > 0 )
@@ -561,7 +664,7 @@ sub init
 						if ($connectionFromWest eq $node)
 						{
 							my $weight;
-							if ($network->{'random weights'})
+							if ($network->{'randomweights'})
 							{
 								$weight = rand(2)-1;
 							}
@@ -595,10 +698,10 @@ sub init
 			{
 			foreach my $eastNodes (@{$network->{'layers'}->[$currentLayer+1]->{'nodes'}})
 			{
-				if (!$network->{'random connections'}  || $network->{'random connections'} > rand(1))
+				if (!$network->{'randomconnections'}  || $network->{'randomconnections'} > rand(1))
 				{
 					my $weight;
-					if ($network->{'random weights'})
+					if ($network->{'randomweights'})
 					{
 						$weight = rand(1);
 					}
@@ -627,7 +730,7 @@ sub init
 			{
 				push @{$node->{'connectedNodesWest'}->{'nodes'}},$network->{'biasNode'};
 				my $weight;
-				if ($network->{'random weights'})
+				if ($network->{'randomweights'})
 				{
 					$weight = rand(1);
 				}
@@ -644,7 +747,7 @@ sub init
 
 
 
-
+	return 1; # return success if we get to here
 
 
 }
@@ -653,16 +756,16 @@ sub init
 # sub $network->dbug
 ###############################################################################
 
-=pod
-
-=head1 AI::NNFlex::$network->dbug
-
-
-
-Internal use, writes to STDOUT parameter 1 if parameter 2 == global variable $DEBUG.
-or parameter 2 == 1
-
-=cut
+#=pod
+#
+#=head1 AI::NNFlex::$network->dbug
+#
+#
+#
+#Internal use, writes to STDOUT parameter 1 if parameter 2 == global variable $DEBUG.
+#or parameter 2 == 1
+#
+##=cut
 
 ###############################################################################
 sub dbug
@@ -702,17 +805,17 @@ sub dbug
 # AI::NNFlex::dump_state
 ###############################################################################
 
-=pod
-
-=head1 AI::NNFlex::dump_state
-
-
-
-$network->dump_state({"filename"=>"test.wts"[, "activations"=>1]});
-
-Dumps the current contents of the node weights to a file.
-
-=cut
+#=pod
+#
+#=head1 AI::NNFlex::dump_state
+#
+#
+#
+#$network->dump_state({"filename"=>"test.wts"[, "activations"=>1]});
+#
+#Dumps the current contents of the node weights to a file.
+#
+##=cut
 
 ###############################################################################
 
@@ -765,21 +868,21 @@ sub dump_state
 ###############################################################################
 # sub load_state
 ###############################################################################
-=pod
-
-=head1 load_state
-
-useage:
-	$network->load_state(<filename>);
-
-Initialises the network with the state information (weights and, optionally
-activation) from the specified filename.
-
-Note that if you have a file containing activation, but you are not using
-persistent activation, the activation states of nodes will be reset during
-network->run
-
-=cut
+#=pod
+#
+#=head1 load_state
+#
+#useage:
+#	$network->load_state(<filename>);
+#
+#Initialises the network with the state information (weights and, optionally
+#activation) from the specified filename.
+#
+#Note that if you have a file containing activation, but you are not using
+#persistent activation, the activation states of nodes will be reset during
+#network->run
+#
+##=cut
 ################################################################################
 sub load_state
 {
@@ -858,28 +961,28 @@ sub load_state
 ##############################################################################
 # sub lesion
 ##############################################################################
-=pod
-
-=head1 AI::NNFlex::lesion
-
-=item
-
-Calls node::lesion for each node in each layer
-
-Lesions a node to emulate damage. Syntax is as follows
-
-$network->lesion({'nodes'=>.2,'connections'=>.4});
-
-assigns a .2 probability of a given node being lesioned, and
-.4 probability of a given connection being lesioned. Either option can
-be omitted but it must have one or the other to do. If you programmatically
-need to call it with no lesioning to be done, call with a 0 probability of
-lesioning for one of the options.
-
-return value is true if successful;
-
-
-=cut
+#=pod
+#
+#=head1 AI::NNFlex::lesion
+#
+#=item
+#
+#Calls node::lesion for each node in each layer
+#
+#Lesions a node to emulate damage. Syntax is as follows
+#
+#$network->lesion({'nodes'=>.2,'connections'=>.4});
+#
+#assigns a .2 probability of a given node being lesioned, and
+#.4 probability of a given connection being lesioned. Either option can
+#be omitted but it must have one or the other to do. If you programmatically
+#need to call it with no lesioning to be done, call with a 0 probability of
+#lesioning for one of the options.
+#
+#return value is true if successful;
+#
+#
+##=cut
 ##########################################################
 sub lesion
 {
@@ -919,35 +1022,35 @@ sub lesion
 ###############################################################################
 package AI::NNFlex::layer;
 
-=pod
-
-=head1 AI::NNFlex::layer
-
-
-
-The layer object
-
-=cut
+#=pod
+#
+#=head1 AI::NNFlex::layer
+#
+#
+#
+#The layer object
+#
+##=cut
 
 ###############################################################################
 # AI::NNFlex::layer::new
 ###############################################################################
 
-=pod
-
-=head1 AI::NNFlex::layer::new
-
-
-
-Create new layer
-
-Takes the parameters from AI::NNFlex::layer and passes them through to AI::NNFlex::node::new
-
-(Uses nodes=>X to decide how many nodes to create)
-
-Returns a layer object containing an array of node objects
-
-=cut
+#=pod
+#
+#=head1 AI::NNFlex::layer::new
+#
+#
+#
+#Create new layer
+#
+#Takes the parameters from AI::NNFlex::layer and passes them through to AI::NNFlex::node::new
+#
+#(Uses nodes=>X to decide how many nodes to create)
+#
+#Returns a layer object containing an array of node objects
+#
+##=cut
 
 ###############################################################################
 sub new
@@ -955,6 +1058,7 @@ sub new
 	my $layer={};
 	my $class = shift;
 	my $params = shift;
+	bless $layer,$class;
 	 
 	my $numNodes = $$params{'nodes'};
 	
@@ -966,7 +1070,6 @@ sub new
 	}
 
 	$$layer{'nodes'} = \@nodes;
-	bless $layer,$class;
 	AI::NNFlex::dbug($params,"Created layer $layer",2);
 	return $layer;
 }
@@ -975,21 +1078,21 @@ sub new
 # AI::NNFlex::layer::layer_output
 ##############################################################################
 
-=pod
-
-=head1 AI::NNFlex::layer::layer_output
-
-
-
-Receives a reference to a hash of parameters. Valid inputs are
-
-	* layer		-	the layer number you want output from
-
-Returns a reference to an array of outputs
-
-Used by AI::NNFlex::output
-
-=cut
+#=pod
+#
+#=head1 AI::NNFlex::layer::layer_output
+#
+#
+#
+#Receives a reference to a hash of parameters. Valid inputs are
+#
+#	* layer		-	the layer number you want output from
+#
+#Returns a reference to an array of outputs
+#
+#Used by AI::NNFlex::output
+#
+#=cut
 
 ###############################################################################
 sub layer_output
@@ -1012,28 +1115,28 @@ sub layer_output
 ##############################################################################
 # sub lesion
 ##############################################################################
-=pod
-
-=head1 AI::NNFlex::layer::lesion
-
-=item
-
-Calls node::lesion for each node in the layer
-
-Lesions a node to emulate damage. Syntax is as follows
-
-$layer->lesion({'nodes'=>.2,'connections'=>.4});
-
-assigns a .2 probability of a given node being lesioned, and
-.4 probability of a given connection being lesioned. Either option can
-be omitted but it must have one or the other to do. If you programmatically
-need to call it with no lesioning to be done, call with a 0 probability of
-lesioning for one of the options.
-
-return value is true if successful;
-
-
-=cut
+#=pod
+#
+#=head1 AI::NNFlex::layer::lesion
+#
+#=item
+#
+#Calls node::lesion for each node in the layer
+#
+#Lesions a node to emulate damage. Syntax is as follows
+#
+#$layer->lesion({'nodes'=>.2,'connections'=>.4});
+#
+#assigns a .2 probability of a given node being lesioned, and
+#.4 probability of a given connection being lesioned. Either option can
+#be omitted but it must have one or the other to do. If you programmatically
+#need to call it with no lesioning to be done, call with a 0 probability of
+#lesioning for one of the options.
+#
+#return value is true if successful;
+#
+#
+#=cut
 ##########################################################
 sub lesion
 {
@@ -1068,57 +1171,57 @@ sub lesion
 ###############################################################################
 package AI::NNFlex::node;
 
-=pod
-
-=head1 AI::NNFlex::node
-
-
-
-the node object
-
-=cut
+#=pod
+#
+#=head1 AI::NNFlex::node
+#
+#
+#
+#the node object
+#
+#=cut
 
 ###############################################################################
 # AI::NNFlex::node::new
 ###############################################################################
 
-=pod
-
-=head1 AI::NNFlex::node::new
-
-Takes parameters passed from NNFlex via AI::NNFlex::layer
-
-returns a node object containing:
-
-	* activation		-	the nodes current activation
-
-	* decay			-	decay rate
-
-	* adjust error		-	NYI
-
-	* persistent activation -	if true, activation will be summed on
-					each run, rather than zeroed
-					before calculating inputs.
-
-	* ID			-	node identifier (unique across the
-					NNFlex object)
-
-	* threshold		-	the level above which the node
-					becomes active
-
-	* activation function	-	the perl script used as an activation
-					function. Must perform the calculation
-					on a variable called $value.
-
-	* active		-	whether the node is active or
-					not. For lesioning. Set to 1
-					on creation
-
- NOTE: it is recommended that nothing programmatic be done with ID. This
- is intended to be used for human reference only.
-
-
-=cut
+#=pod
+#
+#=head1 AI::NNFlex::node::new
+#
+#Takes parameters passed from NNFlex via AI::NNFlex::layer
+#
+#returns a node object containing:
+#
+#	* activation		-	the nodes current activation
+#
+#	* decay			-	decay rate
+#
+#	* adjust error		-	NYI
+#
+#	* persistent activation -	if true, activation will be summed on
+#					each run, rather than zeroed
+#					before calculating inputs.
+#
+#	* ID			-	node identifier (unique across the
+#					NNFlex object)
+#
+#	* threshold		-	the level above which the node
+#					becomes active
+#
+#	* activation function	-	the perl script used as an activation
+#					function. Must perform the calculation
+#					on a variable called $value.
+#
+#	* active		-	whether the node is active or
+#					not. For lesioning. Set to 1
+#					on creation
+#
+# NOTE: it is recommended that nothing programmatic be done with ID. This
+# is intended to be used for human reference only.
+#
+#
+#=cut
 
 ###############################################################################
 sub new
@@ -1127,7 +1230,7 @@ sub new
 	my $node = {};
 	my $params = shift;
 
-	if ($$params{'random activation'})
+	if ($$params{'randomactivation'})
 	{
 		$$node{'activation'} = 
 			rand($$params{'random'});
@@ -1137,24 +1240,14 @@ sub new
 	{
 		$$node{'activation'} = 0;
 	}
-	$$node{'random weights'} = $$params{'random weights'};
+	$$node{'randomweights'} = $$params{'randomweights'};
 	$$node{'decay'} = $$params{'decay'};
-	$$node{'adjust error'} = $$params{'adjust error'};
-	$$node{'persistent activation'} = $$params{'persistent activation'};
+	$$node{'adjusterror'} = $$params{'adjusterror'};
+	$$node{'persistentactivation'} = $$params{'persistentactivation'};
 	$$node{'threshold'} = $$params{'threshold'};
-	$$node{'activation function'} = $$params{'activation function'};
+	$$node{'activationfunction'} = $$params{'activationfunction'};
 	$$node{'active'} = 1;
 	
-
-	# we dont do this anymore
-	#load the activation function code into an attribute
-	#open (ACT,"NNFlex/".$$node{'activation function'}.".pl") or die "Can't open activation function file\n";
-	#while (<ACT>)
-	#{
-	#	$$node{'activation function code'} .= $_;
-	#}
-	#close ACT;
-
 
 	$$node{'error'} = 0;
 	
@@ -1166,28 +1259,28 @@ sub new
 ##############################################################################
 # sub lesion
 ##############################################################################
-=pod 
-
-=head1 AI::NNFlex::node::lesion
-
-=item
-
-Lesions a node to emulate damage. Syntax is as follows
-
-$node->lesion({'nodes'=>.2,'connections'=>.4});
-
-assigns a .2 probability of a given node being lesioned, and 
-.4 probability of a given connection being lesioned. Either option can
-be omitted but it must have one or the other to do. If you programmatically
-need to call it with no lesioning to be done, call with a 0 probability of
-lesioning for one of the options.
-
-return value is true if successful;
-
-Implemented as a method of node to permit node by node or layer by layer
-lesioning
-
-=cut
+#=pod 
+#
+#=head1 AI::NNFlex::node::lesion
+#
+#=item
+#
+#Lesions a node to emulate damage. Syntax is as follows
+#
+#$node->lesion({'nodes'=>.2,'connections'=>.4});
+#
+#assigns a .2 probability of a given node being lesioned, and 
+#.4 probability of a given connection being lesioned. Either option can
+#be omitted but it must have one or the other to do. If you programmatically
+#need to call it with no lesioning to be done, call with a 0 probability of
+#lesioning for one of the options.
+#
+#return value is true if successful;
+#
+#Implemented as a method of node to permit node by node or layer by layer
+#lesioning
+#
+#=cut
 
 ###############################################################################
 sub lesion

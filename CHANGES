@@ -1,3 +1,39 @@
+0.14
+20050201
+
+The backprop calculation was nailed to 1-y*y, which is the
+derivative of tanh, so only tanh hidden layers would work.
+Thats now been removed, and a function in linear & tanh called
+<activation function>_slope implemented, which returns the
+slope. I haven't implemented a slope function in sigmoid, for
+the simple reason that I need to learn how to integrate the
+function to find out what the slope is! 
+
+This version introduces a new, friendlier constructor. Instead
+of the pair of anonymous hashes previously required, the 
+constructor now takes fairly normal looking parameters. Layers
+are added to a network using the add_layer method. This combines
+a more intuitive approach with more flexibility.
+The original constructor is not deprecated. Parameter names with
+spaces in on the other hand ('activation function') are. They
+should be replaced by the same parameter name without any spaces.
+The new constructor will convert old format parameter names, but
+its at the users risk.
+See xor.pl or the perldoc & readme for examples.
+
+Cleaned up the perldoc some more. Commented out all the method
+perldocs, so there is just the single block defining the 
+distributions documentation, as advocated by perlmonks. Method
+perldocs in importable modules have not been commented out.
+
+Removed the weight bounding in backprop & momentum. If the network
+is going into an unstable state the weight bounding won't help,
+and it causes errors under perl -w.
+
+Implemented tests (apologies to the CPAN testers for not having
+done so before!).
+
+
 #################################################################
 
 0.13
