@@ -1,7 +1,7 @@
 ##########################################################
-# AI::nnflex::sigmoid
+# AI::NNFlex::sigmoid
 ##########################################################
-# linear activation function for nnflex
+# linear activation function for NNFlex
 ##########################################################
 # 
 ##########################################################
@@ -20,12 +20,12 @@
 use strict;
 
 =pod
-=head1 AI::nnflex::sigmoid
+=head1 AI::NNFlex::sigmoid
 
 =item
 
 	Sigmoid activation function. This code is imported
-	into the nnflex namespace by an eval during
+	into the NNFlex namespace by an eval during
 	$network->init;
 
 	syntax:

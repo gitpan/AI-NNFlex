@@ -1,7 +1,7 @@
 ##########################################################
-# AI::nnflex::reinforce
+# AI::NNFlex::reinforce
 ##########################################################
-# nnflex learning module
+# NNFlex learning module
 # this is a bit of an experimental one. All it does is
 # reinforce the weight depending on the sign & activity
 # of the node, sort of a gross oversimplification of a
@@ -23,18 +23,18 @@
 use strict;
 
 ###########################################################
-# AI::nnflex::reinforce
+# AI::NNFlex::reinforce
 ###########################################################
 =pod
 
-=head1 AI::nnflex::reinforce
+=head1 AI::NNFlex::reinforce
 
 =item
 
 This module is a (very experimental) reinforcement learning
-algorithm for nnflex. It works on the basis of a GROSS simplification
+algorithm for NNFlex. It works on the basis of a GROSS simplification
 of neuron activity, in that it reinforces active paths. It is
-is included in the nnflex namespace at run time. See documentation
+is included in the NNFlex namespace at run time. See documentation
 below for standard methods.
 
 Copyright (c) 2004-2005 Charles Colbourn. All rights reserved. This program is free software; you can redistribute it and/or modify
@@ -45,11 +45,11 @@ it under the same terms as Perl itself.
 
 
 ###########################################################
-#AI::nnflex::reinforce::learn
+#AI::NNFlex::reinforce::learn
 ###########################################################
 =pod
 
-=head1 AI::nnflex::reinforce::learn
+=head1 AI::NNFlex::reinforce::learn
 
 =item
 
@@ -59,7 +59,7 @@ Performs one learning pass back through the network - only
 currently reinforces from west to east (i.e. no reverse
 flow).
 
-This package is imported into the nnflex namespace at runtime
+This package is imported into the NNFlex namespace at runtime
 via a parameter to the network object.
 
 syntax:

@@ -57,17 +57,17 @@ will be optional anyway.
 
 Usage:
 
-The current version of nnflex is basically just an API,
+The current version of NNFlex:: is basically just an API,
 rather than a modelling package. A more user friendly
 frontend may follow later. To create a network, use the
 following syntax:
 
-use nnflex;
-my $network = nnflex->new([array of hashes],{hash of global config});
+use NNFlex::;
+my $network = NNFlex::->new([array of hashes],{hash of global config});
 
 for example:
 
-my $object = nnflex->new([{"nodes"=>2,"persistent activation"=>0,"decay"=>0.0,"random activation"=>0,"threshold"=>0.0,"activation fu
+my $object = NNFlex::->new([{"nodes"=>2,"persistent activation"=>0,"decay"=>0.0,"random activation"=>0,"threshold"=>0.0,"activation fu
 nction"=>"tanh","random weights"=>1},
                         {"nodes"=>2,"persistent activation"=>0,"decay"=>0.0,"random activation"=>0,"threshold"=>0.0,"activation func
 tion"=>"tanh","random weights"=>1},
@@ -80,7 +80,7 @@ layer in the network. Global config options like
 learning rates, debug, whether bias is used etc are
 contained in a separate hash after the array of layers.
 
-The object returned is an nnflex object, which contains
+The object returned is an NNFlex:: object, which contains
 a number of properties and methods. This is where it gets
 complicated, because exactly what properties and methods
 depends on what has been defined in config. In particular
@@ -102,15 +102,15 @@ then the backpropagation algorithm module 'backprop.pm'
 will be included, and any calls to 'learn' will use the
 learn method defined in there.
 
-The nnflex object has a property called 'layers'. This
-is an array containing an nnflex::layer object for each
+The NNFlex:: object has a property called 'layers'. This
+is an array containing an NNFlex::::layer object for each
 layer in the network.
 
-The nnflex::layer object has a property called 'nodes'.
-This is an array containing nnflex::node objects, one
+The NNFlex::::layer object has a property called 'nodes'.
+This is an array containing NNFlex::::node objects, one
 for each node in the layer.
 
-The nnflex::node object has a whole host of properties,
+The NNFlex::::node object has a whole host of properties,
 see the perldoc for full details. Among them are:
 * activation 	- the current activation of the node
 * activation function
@@ -178,7 +178,7 @@ Dr Martin Le Voi, for considerable amounts of help when
 trying to get my head around the fundamentals of backprop.
 
 BUGS, FEATURE REQUESTS AND PATCHES
-Please feel free to amend, improve and patch nnflex to 
+Please feel free to amend, improve and patch NNFlex:: to 
 whatever extent you wish. Any really nice additional
 functionality, please mail it to me (as a diff, an 
 amended module/script, or a description) at the address
@@ -214,7 +214,7 @@ Copyright (c) 2004-2005 Charles Colbourn. All rights reserved. This program is f
 
 CONTACT
 
-charlesc@nnflex.g0n.net
+charlesc@NNFlex::.g0n.net
 
 
 

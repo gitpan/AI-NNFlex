@@ -2,7 +2,7 @@ use strict;
 use vars qw ($VERSION);
 #use warnings;
 ###############################################################################
-# nnflex - Neural Network (flexible) - a heavily custom NN simulator
+# NNFlex - Neural Network (flexible) - a heavily custom NN simulator
 # 
 # Sept 2004 - CW Colbourn
 #
@@ -60,14 +60,14 @@ my @DEBUG; 	# a single, solitary, shameful global variable. Couldn't
 
 ###############################################################################
 ###############################################################################
-# package nnflex
+# package NNFlex
 ###############################################################################
 ###############################################################################
-package AI::nnflex;
+package AI::NNFlex;
 
 
 =pod
-=head1 AI::nnflex - Neural Network (Flexible)
+=head1 AI::NNFlex - Neural Network (Flexible)
 
 =head2 a heavily custom neural network simulator
 
@@ -130,17 +130,17 @@ will be optional anyway.
 
 Usage:
 
-The current version of nnflex is basically just an API,
+The current version of NNFlex is basically just an API,
 rather than a modelling package. A more user friendly
 frontend may follow later. To create a network, use the
 following syntax:
 
-use nnflex;
-my $network = nnflex->new([array of hashes],{hash of global config});
+use AI::NNFlex;
+my $network = AI::NNFlex->new([array of hashes],{hash of global config});
 
 for example:
 
-my $object = nnflex->new([{"nodes"=>2,"persistent activation"=>0,"decay"=>0.0,"random activation"=>0,"threshold"=>0.0,"activation fu
+my $object = AI::NNFlex->new([{"nodes"=>2,"persistent activation"=>0,"decay"=>0.0,"random activation"=>0,"threshold"=>0.0,"activation fu
 nction"=>"tanh","random weights"=>1},
                         {"nodes"=>2,"persistent activation"=>0,"decay"=>0.0,"random activation"=>0,"threshold"=>0.0,"activation func
 tion"=>"tanh","random weights"=>1},
@@ -153,7 +153,7 @@ layer in the network. Global config options like
 learning rates, debug, whether bias is used etc are
 contained in a separate hash after the array of layers.
 
-The object returned is an nnflex object, which contains
+The object returned is an NNFlex object, which contains
 a number of properties and methods. This is where it gets
 complicated, because exactly what properties and methods
 depends on what has been defined in config. In particular
@@ -175,15 +175,15 @@ then the backpropagation algorithm module 'backprop.pm'
 will be included, and any calls to 'learn' will use the
 learn method defined in there.
 
-The nnflex object has a property called 'layers'. This
-is an array containing an AI::nnflex::layer object for each
+The AI::NNFlex object has a property called 'layers'. This
+is an array containing an AI::NNFlex::layer object for each
 layer in the network.
 
-The AI::nnflex::layer object has a property called 'nodes'.
-This is an array containing AI::nnflex::node objects, one
+The AI::NNFlex::layer object has a property called 'nodes'.
+This is an array containing AI::NNFlex::node objects, one
 for each node in the layer.
 
-The AI::nnflex::node object has a whole host of properties,
+The AI::NNFlex::node object has a whole host of properties,
 see the perldoc for full details. Among them are:
 * activation    - the current activation of the node
 * activation function
@@ -251,7 +251,7 @@ Dr Martin Le Voi, for considerable amounts of help when
 trying to get my head around the fundamentals of backprop.
 
 BUGS, FEATURE REQUESTS AND PATCHES
-Please feel free to amend, improve and patch nnflex to 
+Please feel free to amend, improve and patch NNFlex to 
 whatever extent you wish. Any really nice additional
 functionality, please mail it to me (as a diff, an 
 amended module/script, or a description) at the address
@@ -300,12 +300,12 @@ charlesc@nnflex.g0n.net
 
 
 ###############################################################################
-# AI::nnflex::new
+# AI::NNFlex::new
 ###############################################################################
 
 =pod
 
-=head1 AI::nnflex::new
+=head1 AI::NNFlex::new
 
 =head2 constructor - creates new neural network
 
@@ -355,7 +355,7 @@ Valid parameters are currently:
 					an ARRAY of which debugs you require.
 					0 - error
 					1 - TBD
-					2 - nnflex core debug
+					2 - NNFlex.pm core debug
 					3 - networktype debug
 					4 - learning algorithm debug
 					5 - activation function debug
@@ -393,7 +393,7 @@ sub new
 	my $params = shift;
 	my $netParams = shift;
 	my @layers;
-	dbug ($netParams,"Entered AI::nnflex::new with params $params $netParams",2);
+	dbug ($netParams,"Entered AI::NNFlex::new with params $params $netParams",2);
 
 	# Network wide parameters (e.g. random weights)
 	foreach (keys %$netParams)
@@ -406,12 +406,12 @@ sub new
 	# is included here
 	if( $network->{'networktype'})
 	{
-		my $requirestring = "require \"AI/nnflex/".$network->{'networktype'}.".pm\"";
+		my $requirestring = "require \"AI/NNFlex/".$network->{'networktype'}.".pm\"";
 		eval($requirestring);
 	}
 	if( $network->{'learning algorithm'})
 	{
-		my $requirestring = "require \"AI/nnflex/".$network->{'learning algorithm'}.".pm\"";
+		my $requirestring = "require \"AI/NNFlex/".$network->{'learning algorithm'}.".pm\"";
 		eval($requirestring);
 	}
 	if( $network->{'debug'})
@@ -424,7 +424,7 @@ sub new
 	{
 		if (!($$_{'nodes'})){next}
 		my %layer = %{$_};	
-		push @layers,AI::nnflex::layer->new(\%layer);	
+		push @layers,AI::NNFlex::layer->new(\%layer);	
 	}	
 	$$network{'layers'} = \@layers;
 
@@ -433,7 +433,7 @@ sub new
 
 	if ($network->{'bias'})
 	{
-		my $biasNode = AI::nnflex::node->new({'activation function'=>'linear'});
+		my $biasNode = AI::NNFlex::node->new({'activation function'=>'linear'});
 		$$network{'biasNode'} = $biasNode;
 		$$network{'biasNode'}->{'activation'} = 1;
 	}
@@ -446,11 +446,11 @@ sub new
 
 
 ###############################################################################
-# AI::nnflex::output
+# AI::NNFlex::output
 ###############################################################################
 =head 
 
-=head1 AI::nnflex::output
+=head1 AI::NNFlex::output
 
 
 $object->output({"output"=>"1"}); returns the activation of layer 1
@@ -479,7 +479,7 @@ sub output
 		$outputLayer = $finalLayer
 	}
 
-	my $output = AI::nnflex::layer::layer_output($outputLayer);
+	my $output = AI::NNFlex::layer::layer_output($outputLayer);
 	return $output;
 }
 ################################################################################
@@ -488,11 +488,11 @@ sub output
 
 =pod
 
-=head1 AI::nnflex::init
+=head1 AI::NNFlex::init
 
 
 
-called from AI::nnflex::new. no external use required, but not defined as local, in case of debugging use
+called from AI::NNFlex::new. no external use required, but not defined as local, in case of debugging use
 
 Init runs through each layer of node objects, creating properties in each node:
 
@@ -534,7 +534,7 @@ them to iterate through the connected nodes in a layer to the east or west.
 sub init
 {
 
-	#Revised version of init for nnflex
+	#Revised version of init for NNFlex
 
 	my $network = shift;
 	my @layers = @{$network->{'layers'}};
@@ -548,7 +548,7 @@ sub init
 		foreach my $node (@{$layer->{'nodes'}})
 		{
 			# import the nodes activation function
-			my $requireString = "require (\"AI/nnflex/".$node->{'activation function'}.".pm\")";
+			my $requireString = "require (\"AI/NNFlex/".$node->{'activation function'}.".pm\")";
 			eval ($requireString);
 			$node->{'nodeid'} = $nodeid;
 			# only initialise to the west if layer > 0
@@ -655,7 +655,7 @@ sub init
 
 =pod
 
-=head1 AI::nnflex::$network->dbug
+=head1 AI::NNFlex::$network->dbug
 
 
 
@@ -699,12 +699,12 @@ sub dbug
 
 
 ###############################################################################
-# AI::nnflex::dump_state
+# AI::NNFlex::dump_state
 ###############################################################################
 
 =pod
 
-=head1 AI::nnflex::dump_state
+=head1 AI::NNFlex::dump_state
 
 
 
@@ -861,14 +861,14 @@ sub load_state
 
 ###############################################################################
 ###############################################################################
-# Package AI::nnflex::layer
+# Package AI::NNFlex::layer
 ###############################################################################
 ###############################################################################
-package AI::nnflex::layer;
+package AI::NNFlex::layer;
 
 =pod
 
-=head1 AI::nnflex::layer
+=head1 AI::NNFlex::layer
 
 
 
@@ -877,18 +877,18 @@ The layer object
 =cut
 
 ###############################################################################
-# AI::nnflex::layer::new
+# AI::NNFlex::layer::new
 ###############################################################################
 
 =pod
 
-=head1 AI::nnflex::layer::new
+=head1 AI::NNFlex::layer::new
 
 
 
 Create new layer
 
-Takes the parameters from AI::nnflex::layer and passes them through to AI::nnflex::node::new
+Takes the parameters from AI::NNFlex::layer and passes them through to AI::NNFlex::node::new
 
 (Uses nodes=>X to decide how many nodes to create)
 
@@ -909,22 +909,22 @@ sub new
 
 	for (1..$numNodes)
 	{
-		push @nodes, AI::nnflex::node->new($params);
+		push @nodes, AI::NNFlex::node->new($params);
 	}
 
 	$$layer{'nodes'} = \@nodes;
 	bless $layer,$class;
-	AI::nnflex::dbug($params,"Created layer $layer",2);
+	AI::NNFlex::dbug($params,"Created layer $layer",2);
 	return $layer;
 }
 
 ###############################################################################
-# AI::nnflex::layer::layer_output
+# AI::NNFlex::layer::layer_output
 ##############################################################################
 
 =pod
 
-=head1 AI::nnflex::layer::layer_output
+=head1 AI::NNFlex::layer::layer_output
 
 
 
@@ -934,7 +934,7 @@ Receives a reference to a hash of parameters. Valid inputs are
 
 Returns a reference to an array of outputs
 
-Used by AI::nnflex::output
+Used by AI::NNFlex::output
 
 =cut
 
@@ -957,14 +957,14 @@ sub layer_output
 
 ###############################################################################
 ###############################################################################
-# package AI::nnflex::node
+# package AI::NNFlex::node
 ###############################################################################
 ###############################################################################
-package AI::nnflex::node;
+package AI::NNFlex::node;
 
 =pod
 
-=head1 AI::nnflex::node
+=head1 AI::NNFlex::node
 
 
 
@@ -973,16 +973,16 @@ the node object
 =cut
 
 ###############################################################################
-# AI::nnflex::node::new
+# AI::NNFlex::node::new
 ###############################################################################
 
 =pod
 
-=head1 AI::nnflex::node::new
+=head1 AI::NNFlex::node::new
 
 
 
-Takes parameters passed from nnflex via AI::nnflex::layer
+Takes parameters passed from NNFlex via AI::NNFlex::layer
 
 returns a node object containing:
 
@@ -997,7 +997,7 @@ returns a node object containing:
 					before calculating inputs.
 
 	* ID			-	node identifier (unique across the
-					nnflex object)
+					NNFlex object)
 
 	* threshold		-	the level above which the node
 					becomes active
@@ -1025,7 +1025,7 @@ sub new
 	{
 		$$node{'activation'} = 
 			rand($$params{'random'});
-			AI::nnflex::dbug($params,"Randomly activated at ".$$node{'activation'},2);
+			AI::NNFlex::dbug($params,"Randomly activated at ".$$node{'activation'},2);
 	}
 	else
 	{
@@ -1042,7 +1042,7 @@ sub new
 
 	# we dont do this anymore
 	#load the activation function code into an attribute
-	#open (ACT,"nnflex/".$$node{'activation function'}.".pl") or die "Can't open activation function file\n";
+	#open (ACT,"NNFlex/".$$node{'activation function'}.".pl") or die "Can't open activation function file\n";
 	#while (<ACT>)
 	#{
 	#	$$node{'activation function code'} .= $_;
@@ -1053,7 +1053,7 @@ sub new
 	$$node{'error'} = 0;
 	
 	bless $node,$class;	
-	AI::nnflex::dbug($params,"Created node $node",2);
+	AI::NNFlex::dbug($params,"Created node $node",2);
 	return $node;
 }
 

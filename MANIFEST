@@ -1,8 +1,8 @@
-lib/nnflex.pm
-lib/nnflex/backprop.pm
-lib/nnflex/draw.pm
-lib/nnflex/feedforward.pm
-lib/nnflex/linear.pm
-lib/nnflex/reinforce.pm
-lib/nnflex/sigmoid.pm
-lib/nnflex/tanh.pm
+lib/AI/NNFlex/reinforce.pm
+lib/AI/NNFlex/feedforward.pm
+lib/AI/NNFlex/backprop.pm
+lib/AI/NNFlex/draw.pm
+lib/AI/NNFlex/tanh.pm
+lib/AI/NNFlex/linear.pm
+lib/AI/NNFlex/sigmoid.pm
+lib/AI/NNFlex.pm

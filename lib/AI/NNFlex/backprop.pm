@@ -1,7 +1,7 @@
 ##########################################################
-# AI::nnflex::backprop
+# AI::NNFlex::backprop
 ##########################################################
-# This is the first learning module for nnflex
+# This is the first learning module for NNFlex
 #
 ##########################################################
 # Versions
@@ -19,16 +19,16 @@
 use strict;
 
 ###########################################################
-# AI::nnflex::backprop::learn
+# AI::NNFlex::backprop::learn
 ###########################################################
 =pod
 
-=head1 AI::nnflex::backprop
+=head1 AI::NNFlex::backprop
 
 =item
 
-This module is the backpropagation algorithm for nnflex. it
-is included in the nnflex namespace at run time. See documentation
+This module is the backpropagation algorithm for NNFlex. it
+is included in the NNFlex namespace at run time. See documentation
 below for standard methods.
 
 Copyright (c) 2004-2005 Charles Colbourn. All rights reserved. This program is free software; you can redistribute it and/or modify
@@ -37,11 +37,11 @@ it under the same terms as Perl itself.
 =cut
 
 ###########################################################
-#AI::nnflex::backprop::learn
+#AI::NNFlex::backprop::learn
 ###########################################################
 =pod
 
-=head1 AI::nnflex::backprop::learn
+=head1 AI::NNFlex::backprop::learn
 
 =item
 
@@ -50,7 +50,7 @@ pattern, performs one learning pass back through the network
 with normal backprop procedures to bring the network closer 
 to convergence.
 
-This package is imported into the nnflex namespace at runtime
+This package is imported into the NNFlex namespace at runtime
 via a parameter to the network object.
 
 syntax:
@@ -59,7 +59,7 @@ syntax:
 =cut
 
 ###########################################################
-# AI::nnflex::backprop::calc_error
+# AI::NNFlex::backprop::calc_error
 ###########################################################
 =pod
 =cut
@@ -97,11 +97,11 @@ sub calc_error
 }
 
 ########################################################
-# AI::nnflex::backprop::learn
+# AI::NNFlex::backprop::learn
 ########################################################
 =pod
 
-=head1 AI::nnflex::backprop::learn
+=head1 AI::NNFlex::backprop::learn
 
 =item
 
@@ -138,11 +138,11 @@ sub learn
 
 
 #########################################################
-# AI::nnflex::backprop::hiddenToOutput
+# AI::NNFlex::backprop::hiddenToOutput
 #########################################################
 =pod
 
-=head1 AI::nnflex::backprop::hiddenToOutput
+=head1 AI::NNFlex::backprop::hiddenToOutput
 
 =item
 Performs weight changes for all nodes in the output layer
@@ -177,11 +177,11 @@ sub hiddenToOutput
 }
 
 ######################################################
-# AI::nnflex::backprop::hiddenOrInputToHidden
+# AI::NNFlex::backprop::hiddenOrInputToHidden
 ######################################################
 =pod
 
-=head1 AI::nnflex::backprop::hiddenOrInputToHidden
+=head1 AI::NNFlex::backprop::hiddenOrInputToHidden
 
 =item
 This subroutine calculates and applies delta weights that are not directly
@@ -249,11 +249,11 @@ sub hiddenOrInputToHidden
 }
 
 #########################################################
-# AI::nnflex::backprop::sqrErr
+# AI::NNFlex::backprop::sqrErr
 #########################################################
 =pod
 
-=head1 AI::nnflex::backprop::sqrErr
+=head1 AI::NNFlex::backprop::sqrErr
 
 =item
 

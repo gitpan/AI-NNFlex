@@ -1,7 +1,7 @@
-use AI::nnflex;
+use AI::NNFlex;
 use strict;
 
-my $object = AI::nnflex->new([{"nodes"=>2,"persistent activation"=>0,"decay"=>0.0,"random activation"=>0,"threshold"=>0.0,"activation function"=>"tanh","random weights"=>1},
+my $object = AI::NNFlex->new([{"nodes"=>2,"persistent activation"=>0,"decay"=>0.0,"random activation"=>0,"threshold"=>0.0,"activation function"=>"tanh","random weights"=>1},
                         {"nodes"=>2,"persistent activation"=>0,"decay"=>0.0,"random activation"=>0,"threshold"=>0.0,"activation function"=>"tanh","random weights"=>1},
                        {"nodes"=>1,"persistent activation"=>0,"decay"=>0.0,"random activation"=>0,"threshold"=>0.0,"activation function"=>"linear","random weights"=>1}],{'random connections'=>0,'networktype'=>'feedforward', 'random weights'=>1,'learning algorithm'=>'backprop','learning rate'=>.3,'debug'=>[2,3,4],'bias'=>1});
 print "Debug = ".@{$object->{'debug'}}."\n";
@@ -57,9 +57,9 @@ $object->dump_state({'filename'=>"weights-run.wts",'activations'=>1});
 
 
 
-use AI::nnflex::draw;
+use AI::NNFlex::draw;
 
-my $image = AI::nnflex::draw->network($object);
+my $image = AI::NNFlex::draw->network($object);
 
 open (GIF,">and.gif");
 binmode GIF;

@@ -1,11 +1,11 @@
 # Example demonstrating XOR
 
 
-use AI::nnflex;
+use AI::NNFlex;
 
 # Create the network 
 
-my $object = AI::nnflex->new([{"nodes"=>2,"persistent activation"=>0,"decay"=>0.0,"random activation"=>0,"threshold"=>0.0,"activation function"=>"tanh","random weights"=>1},
+my $object = AI::NNFlex->new([{"nodes"=>2,"persistent activation"=>0,"decay"=>0.0,"random activation"=>0,"threshold"=>0.0,"activation function"=>"tanh","random weights"=>1},
                         {"nodes"=>3,"persistent activation"=>0,"decay"=>0.0,"random activation"=>0,"threshold"=>0.0,"activation function"=>"tanh","random weights"=>1},
                        {"nodes"=>1,"persistent activation"=>0,"decay"=>0.0,"random activation"=>0,"threshold"=>0.0,"activation function"=>"linear","random weights"=>1}],
 {'random connections'=>0,'networktype'=>'feedforward', 'random weights'=>1,'learning algorithm'=>'backprop','learning rate'=>.3,'debug'=>[],'bias'=>1});
@@ -74,10 +74,10 @@ $object->dump_state({'filename'=>"weights-run.wts",'activations'=>1});
 
 
 # use the experimental network drawing package
-use AI::nnflex::draw;
+use AI::NNFlex::draw;
 
 # draw a diagram of the network
-my $image = AI::nnflex::draw->network($object);
+my $image = AI::NNFlex::draw->network($object);
 
 # and write it out to a file
 open (GIF,">xor.gif");

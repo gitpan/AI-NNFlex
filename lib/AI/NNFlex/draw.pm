@@ -1,5 +1,5 @@
 ##########################################################
-# AI::nnflex::draw
+# AI::NNFlex::draw
 ##########################################################
 # Draw a gif file of the network
 ##########################################################
@@ -18,15 +18,15 @@
 ###########################################################
 #
 use strict;
-package AI::nnflex::draw;
+package AI::NNFlex::draw;
 
 =pod
-=head1 AI::nnflex::draw::network
+=head1 AI::NNFlex::draw::network
 
 simple network diagram routine.
 syntax:
 
-	my $gif = AI::nnflex::draw->network($network);
+	my $gif = AI::NNFlex::draw->network($network);
 
 Returns a GIF object. This is the first tentative step 
 towards a GUI control for the bundle;
@@ -49,7 +49,7 @@ sub network
 	my $network = shift;
 	my @nodeList;
 
-	$network->dbug("Entered AI::nnflex::draw with network $network",6);
+	$network->dbug("Entered AI::NNFlex::draw with network $network",6);
 
 	# I nicked this code from my ldapmonitor script, so there could
 	# be ldap variables lurking in here

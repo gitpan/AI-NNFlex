@@ -1,10 +1,9 @@
 ##########################################################
-# AI::nnflex::tanh
+# AI::NNFlex::linear
 ##########################################################
-# tanh activation function for nnflex
+# linear activation function for NNFlex
 ##########################################################
-# This code copied pretty much wholesale from Phil Brierleys
-# example - see the nnflex readme
+# 
 ##########################################################
 # Versions
 # ========
@@ -20,41 +19,30 @@
 #
 use strict;
 
+
 =pod
-=head1 AI::nnflex::tanh
+=head1 AI::NNFlex::linear
 
 =item
 
-sigmoid activation function. This code is imported into
-the nnflex namespace during init
+Linear activation function. This code is imported into
+the NNFlex namespace during init
 
 syntax:
-
-        my $value = $network->tanh(<value>);
+	my $value = $network->linear(<value>);
 
 Copyright (c) 2004-2005 Charles Colbourn. All rights reserved. This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
 ############################################################
-	
-sub tanh
+
+sub linear
 {
 
 	my $network = shift;
-	my $value = shift;
-
-	my $a = exp($value);
-	my $b = exp(-$value);
-   if ($value > 20){ $value=1;}
-    elsif ($value < -20){ $value= -1;}
-    else
-        {
-        my $a = exp($value);
-        my $b = exp(-$value);
-        $value =  ($a-$b)/($a+$b);
-        }
-	$network->dbug("Tanh activation returning $value",5);	
+	my $value = shift;	
+	$network->dbug("Linear activation returning $value",5);	
 	return $value;
 }
 

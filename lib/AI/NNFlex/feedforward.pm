@@ -1,7 +1,7 @@
 ##########################################################
-# AI::nnflex::feedforward
+# AI::NNFlex::feedforward
 ##########################################################
-# This is the first propagation module for nnflex
+# This is the first propagation module for NNFlex
 #
 ##########################################################
 # Versions
@@ -22,15 +22,15 @@
 use strict;
 
 ##########################################################
-# AI::nnflex::feedforward
+# AI::NNFlex::feedforward
 ##########################################################
 =pod
-=head1 AI::nnflex::feedforward - feedforward module for nnflex
+=head1 AI::NNFlex::feedforward - feedforward module for NNFlex
 
 =item
 
-This module is the feedforward network type for nnflex. it
-is included in the nnflex namespace at run time. See documentation
+This module is the feedforward network type for NNFlex. it
+is included in the NNFlex:: namespace at run time. See documentation
 below for standard methods.
 
 Copyright (c) 2004-2005 Charles Colbourn. All rights reserved. This program is free software; you can redistribute it and/or modify
@@ -43,19 +43,19 @@ it under the same terms as Perl itself.
 
 
 ###########################################################
-# AI::nnflex::feedforward::run
+# AI::NNFlex::feedforward::run
 ###########################################################
 =pod
 
-=head1 AI::nnflex::feedforward::run
+=head1 AI::NNFlex::feedforward::run
 
 =item
 
 This class contains the run method only. The run method performs
 feedforward  (i.e. west to east) activation flow on the network.
 
-This class is internal to the nnflex package, and is included
-in the nnflex namespace by a require on the networktype parameter.
+This class is internal to the NNFlex package, and is included
+in the NNFlex namespace by a require on the networktype parameter.
 
 syntax:
  $network->run([0,1,1,1,0,1,1]);
