@@ -17,3 +17,16 @@ to do.
 
 ################################################################
 
+0.12
+20050116
+
+Fixed a bug in reinforce.pm reported by G M Passos
+Inserted a catch in feedforward->run to call datasets if the syntax
+
+$network->run($dataset) is called.
+
+Strictly speaking this doesn't fit with the design, but its likely to
+be used quite a bit so its worth catching
+
+################################################################
+

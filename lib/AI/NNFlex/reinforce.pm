@@ -12,6 +12,8 @@
 # ========
 #
 # 1.0	20041125	CColbourn	New module
+# 1.1	20050116	CColbourn	Fixed reverse @layers
+#					bug reported by GM Passos
 #
 ##########################################################
 # ToDo
@@ -77,10 +79,9 @@ sub learn
 
 	# no connections westwards from input, so no weights to adjust
 	shift @layers;
-	# start with the last layer first
-	reverse @layers;
 
-	foreach my $layer (@layers)
+	# reverse to start with the last layer first
+	foreach my $layer (reverse @layers)
 	{
 		my @nodes = @{$layer->{'nodes'}};
 

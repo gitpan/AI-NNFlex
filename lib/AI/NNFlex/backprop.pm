@@ -8,6 +8,8 @@
 # ========
 #
 # 1.0	20041018	CColbourn	New module
+# 1.1	20050116	CColbourn	added dataset translater
+#					to ::learn
 #
 ##########################################################
 # ToDo
@@ -120,6 +122,15 @@ sub learn
 	my $network = shift;
 
 	my $outputPatternRef = shift;
+
+	# if this is an incorrect dataset call translate it
+	if ($outputPatternRef =~/Dataset/)
+	{
+		return ($outputPatternRef->learn($network))
+	}
+
+
+
 	my @outputPattern = @$outputPatternRef;
 
 	$network->calc_error($outputPatternRef);

@@ -9,6 +9,11 @@
 #
 # 1.0	20040910	CColbourn	New module
 #
+# 1.1	20050116	CColbourn	Added call to 
+#					datasets where run
+#					is erroneously called
+#					with a dataset
+#
 ##########################################################
 # ToDo
 # ----
@@ -67,6 +72,14 @@ sub run
 	my $network = shift;
 
 	my $inputPatternRef = shift;
+	
+	# if this is an incorrect dataset call translate it
+	if ($inputPatternRef =~/Dataset/)
+	{
+		return ($inputPatternRef->run($network))
+	}
+
+
 	my @inputPattern = @$inputPatternRef;
 
 	$network->dbug ("Input pattern @inputPattern received by feedforward",3);

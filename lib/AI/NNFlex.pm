@@ -21,9 +21,16 @@ use vars qw ($VERSION);
 # ===============
 #
 # 0.1 20040905		CColbourn	New module
+#					added NNFlex::datasets
+#
 # 0.11 20050113		CColbourn	Added NNFlex::lesion
 #					Improved Draw
 #					added NNFlex::datasets
+#
+# 0.12 20050116		CColbourn	Fixed reinforce.pm bug
+# 					Added call into datasets
+#					in ::run to offer alternative
+#					syntax
 #
 ###############################################################################
 # ToDo
@@ -50,7 +57,7 @@ use vars qw ($VERSION);
 # Clean up the perldocs
 #
 ###############################################################################
-$VERSION = "0.11";
+$VERSION = "0.12";
 
 
 ###############################################################################
@@ -237,11 +244,11 @@ Dr Martin Le Voi, for help with concepts of NN in the early stages
 
 Dr David Plaut, for help with the project that this code was originally intended for.
 
-Graciliano M.P. for suggestions & improved code (see SEE ALSO).
+Graciliano M.Passos for suggestions & improved code (see SEE ALSO).
 
 =head1 SEE ALSO
 
-AI::NNEasy - Developed by Graciliano M.P. 
+AI::NNEasy - Developed by Graciliano M.Passos 
 Shares some common code with NNFlex. Much faster, and more suitable for backprop projects with large datasets.
 
 =head1 TODO
@@ -263,6 +270,8 @@ write a tk gui
 =head1 CHANGES
 
 v0.11 introduces the lesion method, png support in the draw module and datasets.
+v0.12 fixes a bug in reinforce.pm & adds a reflector in feedforward->run to make
+$network->run($dataset) work.
 
 
 =head1 COPYRIGHT

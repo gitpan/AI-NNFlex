@@ -3,7 +3,7 @@
 NNFlex - a flexible native perl API for neural networks
 
 Author: Charles Colbourn
-Version: 0.11
+Version: 0.12
 Date: January 2005
 
 NNFLEX is intended to be a flexible framework for

@@ -23,9 +23,17 @@ my $err = 10;
 while ($err >.01)
 {
 	$err = $dataset->learn($network);
+
+	# Alternative incorrect but supported syntax
+	# (caught and translated by module)
+	# $err = $network->learn($dataset);
+
 	print "Error = $err\n";
 }
 
+
+# alternative incorrect but supported syntax
+# foreach (@{$network->run($dataset)})
 foreach (@{$dataset->run($network)})
 {
 	foreach (@$_){print $_}
