@@ -3,8 +3,8 @@
 NNFlex - a flexible native perl API for neural networks
 
 Author: Charles Colbourn
-Version: 0.1
-Date: November 2004
+Version: 0.11
+Date: January 2005
 
 NNFLEX is intended to be a flexible framework for
 developing neural network applications. The code is
@@ -15,6 +15,12 @@ http://www.philbrierley.com
 for that (it's in java and vb on the site, If you need
 to read it in perl, there is a translated version in
 this package, filename bp.pl).
+
+This document gives much more detail about the API
+than the standard POD (although if you dig around in the
+POD its all in there somewhere). I habitually document
+every method, public or private, with a block of POD 
+beforehand, so the code should be very easy to understand.
 
 
 Rationale:
@@ -62,12 +68,12 @@ rather than a modelling package. A more user friendly
 frontend may follow later. To create a network, use the
 following syntax:
 
-use NNFlex::;
-my $network = NNFlex::->new([array of hashes],{hash of global config});
+use AI::NNFlex;
+my $network = AI::NNFlex->new([array of hashes],{hash of global config});
 
 for example:
 
-my $object = NNFlex::->new([{"nodes"=>2,"persistent activation"=>0,"decay"=>0.0,"random activation"=>0,"threshold"=>0.0,"activation fu
+my $object = AI::NNFlex->new([{"nodes"=>2,"persistent activation"=>0,"decay"=>0.0,"random activation"=>0,"threshold"=>0.0,"activation fu
 nction"=>"tanh","random weights"=>1},
                         {"nodes"=>2,"persistent activation"=>0,"decay"=>0.0,"random activation"=>0,"threshold"=>0.0,"activation func
 tion"=>"tanh","random weights"=>1},
@@ -80,7 +86,7 @@ layer in the network. Global config options like
 learning rates, debug, whether bias is used etc are
 contained in a separate hash after the array of layers.
 
-The object returned is an NNFlex:: object, which contains
+The object returned is an NNFlex object, which contains
 a number of properties and methods. This is where it gets
 complicated, because exactly what properties and methods
 depends on what has been defined in config. In particular
@@ -102,15 +108,15 @@ then the backpropagation algorithm module 'backprop.pm'
 will be included, and any calls to 'learn' will use the
 learn method defined in there.
 
-The NNFlex:: object has a property called 'layers'. This
-is an array containing an NNFlex::::layer object for each
+The NNFlex object has a property called 'layers'. This
+is an array containing an AI::NNFlex::layer object for each
 layer in the network.
 
-The NNFlex::::layer object has a property called 'nodes'.
-This is an array containing NNFlex::::node objects, one
+The AI::NNFlex::layer object has a property called 'nodes'.
+This is an array containing AI::NNFlex::node objects, one
 for each node in the layer.
 
-The NNFlex::::node object has a whole host of properties,
+The AI::NNFlex::node object has a whole host of properties,
 see the perldoc for full details. Among them are:
 * activation 	- the current activation of the node
 * activation function
@@ -143,6 +149,10 @@ networks like 'Hemholtz'(?). Be warned though - at present
 the bias node (heavily used in backprop) is added to the
 list of westerly nodes but has no easterly list.
 
+ID is a purely numeric incremental ID for the node. Please
+don't do anything programmatic with this, its just for
+human reference.
+
 The upshot of this is that you can access (and change)
 anything at any time. For example, you can get the activation
 of a node using:
@@ -163,7 +173,7 @@ another decimal point.
 
 
 VERSION
-0.1
+0.11
 
 ACKNOWLEDGEMENTS
 Phil Brierley, for making his excellent example code
@@ -182,8 +192,8 @@ Please feel free to amend, improve and patch NNFlex:: to
 whatever extent you wish. Any really nice additional
 functionality, please mail it to me (as a diff, an 
 amended module/script, or a description) at the address
-below. Please don't distribute amended versions of the
-code without my say so (see COPYRIGHT).
+below.
+
 
 I'm happy to write additional functionality, time
 permitting. Time is something I don't have a lot of, so
@@ -214,7 +224,7 @@ Copyright (c) 2004-2005 Charles Colbourn. All rights reserved. This program is f
 
 CONTACT
 
-charlesc@NNFlex::.g0n.net
+charlesc@nnflex.g0n.net
 
 
 

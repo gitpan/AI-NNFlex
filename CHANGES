@@ -1,0 +1,19 @@
+###############################################################
+
+0.11
+20050115
+Added PNG support to AI::NNFlex::draw
+
+Added AI::NNFlex::Dataset
+This creates a dataset object that can be run against a
+network
+
+Added AI::NNFlex::lesion
+Damages a network with a probability of losing a node
+or a connection. See the perldoc
+
+Cleaned up the POD docs a bit, although theres a lot still
+to do.
+
+################################################################
+

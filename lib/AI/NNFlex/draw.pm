@@ -9,6 +9,7 @@
 # ========
 #
 # 1.0   20041112       CColbourn       New module
+# 1.1	20050115	CColbourn	Added PNG support
 #
 ###########################################################
 # ToDo
@@ -26,9 +27,9 @@ package AI::NNFlex::draw;
 simple network diagram routine.
 syntax:
 
-	my $gif = AI::NNFlex::draw->network($network);
+	my $gif = AI::NNFlex::draw->network($network,{'type'=>'png/GIF'});
 
-Returns a GIF object. This is the first tentative step 
+Returns a GIF/png object. This is the first tentative step 
 towards a GUI control for the bundle;
 
 NB: the diagram returned displays the activation of the node
@@ -47,6 +48,9 @@ sub network
 {
 	shift;
 	my $network = shift;
+	my $params = shift;
+	my %config = %$params;
+
 	my @nodeList;
 
 	$network->dbug("Entered AI::NNFlex::draw with network $network",6);
@@ -94,6 +98,7 @@ sub network
         my $black = $image->colorAllocate(0,0,0);
         my $red = $image->colorAllocate(255,0,0);
         my $green = $image->colorAllocate(51,204,102);
+	my $grey = $image->colorAllocate(190,190,190);
         $image->transparent($white);
 
 
@@ -125,8 +130,17 @@ sub network
         foreach my $node (@nodeList)
         {
 		$network->dbug("Drawing node $node at ${$nodeCoords{$node}}[0],${$nodeCoords{$node}}[1]",6);
-                $image->arc(${$nodeCoords{$node}}[0],${$nodeCoords{$node}}[1],40,40,0,360,$green);
-                $image->fill(${$nodeCoords{$node}}[0],${$nodeCoords{$node}}[1],$green);
+		if ($node->{'active'})
+		{
+			$image->arc(${$nodeCoords{$node}}[0],${$nodeCoords{$node}}[1],40,40,0,360,$green);
+			$image->fill(${$nodeCoords{$node}}[0],${$nodeCoords{$node}}[1],$green);
+		}
+		else
+		{
+			$image->arc(${$nodeCoords{$node}}[0],${$nodeCoords{$node}}[1],40,40,0,360,$grey);
+			$image->fill(${$nodeCoords{$node}}[0],${$nodeCoords{$node}}[1],$grey);
+		}
+
         }
 
 
@@ -134,8 +148,11 @@ sub network
 	{
 		foreach my $connectedNode (@{$node->{'connectedNodesWest'}->{'nodes'}})       
 		{
-			#Forget the weights for the moment
-			$image->line(${$nodeCoords{$node}}[0],${$nodeCoords{$node}}[1],${$nodeCoords{$connectedNode}}[0], ${$nodeCoords{$connectedNode}}[1],$green);
+			if ($node->{'active'} && $connectedNode->{'active'})
+			{
+				#Forget the weights for the moment
+				$image->line(${$nodeCoords{$node}}[0],${$nodeCoords{$node}}[1],${$nodeCoords{$connectedNode}}[0], ${$nodeCoords{$connectedNode}}[1],$green);
+			}
 		}
 	}
 
@@ -147,14 +164,20 @@ sub network
 		$network->dbug("Node $node activation $activation",6);
 		if ($activation > 1){$activation = 1};
 		if ($activation < 0){$activation = 0};
-		$network->dbug("Node $node adjusted activation $activation",6);
-
-                $image->arc(${$nodeCoords{$node}}[0],${$nodeCoords{$node}}[1],40*$activation,40*$activation,0,360,$red);
-                $image->fillToBorder(${$nodeCoords{$node}}[0],${$nodeCoords{$node}}[1],$red,$red);
+		if ($node->{'active'})
+		{
+			$network->dbug("Node $node adjusted activation $activation",6);
+ 	               $image->arc(${$nodeCoords{$node}}[0],${$nodeCoords{$node}}[1],40*$activation,40*$activation,0,360,$red);
+        	        $image->fillToBorder(${$nodeCoords{$node}}[0],${$nodeCoords{$node}}[1],$red,$red);
+		}
 	}
 
 	$network->dbug("Returning image $image",6);
 
+	if (uc($config{'type'}) eq "GIF"){return $image->gif};
+	if (uc($config{'type'}) eq "PNG"){return $image->png};
+
+	# return gif by default
 	return $image->gif;
 }
 
