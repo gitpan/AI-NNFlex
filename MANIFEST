@@ -1,0 +1,8 @@
+lib/nnflex.pm
+lib/nnflex/backprop.pm
+lib/nnflex/draw.pm
+lib/nnflex/feedforward.pm
+lib/nnflex/linear.pm
+lib/nnflex/reinforce.pm
+lib/nnflex/sigmoid.pm
+lib/nnflex/tanh.pm

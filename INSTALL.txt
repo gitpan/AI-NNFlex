@@ -1,0 +1,27 @@
+If you want to perform a standard install, placing
+the modules etc in the perl standard library locations,
+run:
+perl Makefile.PL
+
+followed by:
+make install
+
+++++++++++++++++++++++++++++++++++++++++++++++++++
+
+alternatively, if you want a local install (i.e.
+placed somewhere in your home directory so only
+you have access to it, perhaps you don't have 
+root access) copy from this location to somewhere
+handy:
+
+mkdir ~/perl/lib/AI/
+cp -R ./lib/* ~/perl/lib/AI/
+
+and if necessary add that location to your PERL5LIB
+env variable (in ~/.profile):
+
+export PERL5LIB=$PERL5LIB:~/perl/lib/
+
+
+
+
