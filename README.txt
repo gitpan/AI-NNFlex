@@ -3,7 +3,7 @@
 NNFlex - a flexible native perl API for neural networks
 
 Author: Charles Colbourn
-Version: 0.12
+Version: 0.13
 Date: January 2005
 
 NNFLEX is intended to be a flexible framework for
@@ -22,6 +22,8 @@ POD its all in there somewhere). I habitually document
 every method, public or private, with a block of POD 
 beforehand, so the code should be very easy to understand.
 
+New in v0.13 is backprop with simple momentum. This has
+so far proved to be about 5* faster than vanilla backprop.
 
 Rationale:
 Why did I do this? Well, first of all, why not. Perl is
@@ -173,7 +175,7 @@ another decimal point.
 
 
 VERSION
-0.11
+0.13
 
 ACKNOWLEDGEMENTS
 Phil Brierley, for making his excellent example code

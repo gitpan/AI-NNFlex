@@ -1,3 +1,45 @@
+#################################################################
+
+0.13
+20050121
+
+New plugin training algorithm - momentum.pm
+Improvement in speed using momentum on xor as follows (epochs)
+mom 0.6
+334
+288
+124
+502
+7433
+avg=1736.2
+
+no mom
+641
+718
+20596
+19964
+660
+avg=8515.8
+
+Significant, I think you'll agree!
+
+Fixed a bug that allowed training to proceed even if the activation
+function (s) can't be loaded.
+
+################################################################
+
+0.12
+20050116
+
+Fixed a bug in reinforce.pm reported by G M Passos
+Inserted a catch in feedforward->run to call datasets if the syntax
+
+$network->run($dataset) is called.
+
+Strictly speaking this doesn't fit with the design, but its likely to
+be used quite a bit so its worth catching
+
+
 ###############################################################
 
 0.11
@@ -14,19 +56,6 @@ or a connection. See the perldoc
 
 Cleaned up the POD docs a bit, although theres a lot still
 to do.
-
-################################################################
-
-0.12
-20050116
-
-Fixed a bug in reinforce.pm reported by G M Passos
-Inserted a catch in feedforward->run to call datasets if the syntax
-
-$network->run($dataset) is called.
-
-Strictly speaking this doesn't fit with the design, but its likely to
-be used quite a bit so its worth catching
 
 ################################################################
 

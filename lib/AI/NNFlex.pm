@@ -32,6 +32,8 @@ use vars qw ($VERSION);
 #					in ::run to offer alternative
 #					syntax
 #
+# 0.13 20050121		CColbourn	Created momentum learning module
+#
 ###############################################################################
 # ToDo
 # ====
@@ -57,7 +59,7 @@ use vars qw ($VERSION);
 # Clean up the perldocs
 #
 ###############################################################################
-$VERSION = "0.12";
+$VERSION = "0.13";
 
 
 ###############################################################################
@@ -272,7 +274,8 @@ write a tk gui
 v0.11 introduces the lesion method, png support in the draw module and datasets.
 v0.12 fixes a bug in reinforce.pm & adds a reflector in feedforward->run to make
 $network->run($dataset) work.
-
+v0.13 introduces the momentum learning algorithm and fixes a bug that allowed
+training to proceed even if the node activation function module can't be loaded
 
 =head1 COPYRIGHT
 
@@ -404,12 +407,12 @@ sub new
 	if( $network->{'networktype'})
 	{
 		my $requirestring = "require \"AI/NNFlex/".$network->{'networktype'}.".pm\"";
-		eval($requirestring);
+		if (!eval($requirestring)){die "Can't load ".$network->{'networktype'}.".pm\n"};
 	}
 	if( $network->{'learning algorithm'})
 	{
 		my $requirestring = "require \"AI/NNFlex/".$network->{'learning algorithm'}.".pm\"";
-		eval($requirestring);
+		if (!eval($requirestring)){die "Can't load ".$network->{'learning algorithm'}.".pm\n"};
 	}
 	if( $network->{'debug'})
 	{
@@ -546,7 +549,7 @@ sub init
 		{
 			# import the nodes activation function
 			my $requireString = "require (\"AI/NNFlex/".$node->{'activation function'}.".pm\")";
-			eval ($requireString);
+			if (!eval ($requireString)){die "Can't load ".$node->{'activation function'}.".pm\n"};
 			$node->{'nodeid'} = $nodeid;
 			# only initialise to the west if layer > 0
 			if ($currentLayer > 0 )

@@ -1,4 +1,4 @@
-# Example demonstrating XOR
+# Example demonstrating XOR with momentum backprop learning
 
 use strict;
 use AI::NNFlex;
@@ -9,7 +9,7 @@ use AI::NNFlex::Dataset;
 my $network = AI::NNFlex->new([{"nodes"=>2,"persistent activation"=>0,"decay"=>0.0,"random activation"=>0,"threshold"=>0.0,"activation function"=>"tanh","random weights"=>1},
                         {"nodes"=>2,"persistent activation"=>0,"decay"=>0.0,"random activation"=>0,"threshold"=>0.0,"activation function"=>"tanh","random weights"=>1},
                        {"nodes"=>1,"persistent activation"=>0,"decay"=>0.0,"random activation"=>0,"threshold"=>0.0,"activation function"=>"linear","random weights"=>1}],
-{'random connections'=>0,'networktype'=>'feedforward', 'random weights'=>1,'learning algorithm'=>'backprop','learning rate'=>.3,'debug'=>[],'bias'=>1});
+{'random connections'=>0,'networktype'=>'feedforward', 'random weights'=>1,'learning algorithm'=>'momentum','learning rate'=>.1,'debug'=>[],'bias'=>1,'momentum'=>0.6});
 
 
 my $dataset = AI::NNFlex::Dataset->new([
