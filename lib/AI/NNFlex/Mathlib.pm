@@ -14,6 +14,13 @@
 #
 # 1.2	CColbourn	20050330	Added in hopfield_threshold
 #
+# 1,3	CColbourn	20050407	Changed sigmoid function to
+#					a standard sigmoid. sigmoid2
+#					now contains old sigmoid,
+#					which is more used in BPTT
+#					and I think needs cross 
+#					entropy calc to work.
+#
 #######################################################
 #Copyright (c) 2004-2005 Charles Colbourn. All rights reserved. This program is free software; you can redistribute it and/or modify
 
@@ -90,11 +97,38 @@ sub linear_slope
 # P&B sigmoid activation (needs slope)
 ############################################################
 
-sub sigmoid
+sub sigmoid2
 {
 	my $network = shift;
 	my $value = shift;	
 	$value = (1+exp(-$value))**-1;
+	$network->dbug("Sigmoid activation returning $value",5);	
+	return $value;
+}
+
+sub sigmoid2_slope
+{
+	my $network = shift;
+	my $value = shift;
+	my @debug = @{$network->{'debug'}};
+
+
+	my $return = exp(-$value) * ((1 + exp(-$value)) ** -2);
+	if (scalar @debug > 0)
+	{$network->dbug("sigmoid_slope returning $value",5);}
+
+	return $return;
+}
+
+############################################################
+# standard sigmoid activation 
+############################################################
+
+sub sigmoid
+{
+	my $network = shift;
+	my $value = shift;	
+	$value = 1/(1+exp(1)**-$value);
 	$network->dbug("Sigmoid activation returning $value",5);	
 	return $value;
 }
@@ -106,7 +140,7 @@ sub sigmoid_slope
 	my @debug = @{$network->{'debug'}};
 
 
-	my $return = exp(-$value) * ((1 + exp(-$value)) ** -2);
+	my $return = $value * (1-$value);
 	if (scalar @debug > 0)
 	{$network->dbug("sigmoid_slope returning $value",5);}
 

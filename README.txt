@@ -1,11 +1,15 @@
 AI::NNFlex
 
-This module has developed quite a bit in the various versions, and backwards compatibility can be a little iffy. The current version is intended to constitute a base class for developing neural nets of all sorts, not just feedforward. I recast a lot of this when I started looking at developing a hopfield module (in progress). If you are seeking to create a neural network and don't really care about what goes on under the covers, you'll probably want the AI::NNFlex::Backprop module. Take a look at the xor.pl file in examples to see how to use it, if the pod doesn't make it clear enough.
+This distribution now contains a reasonably well developed and fast backprop implementation, a very primitive neuron reinforcement module, the first version of my Hopfield module and a variety of utility modules to support this lot.
 
-From here on out, the interface should be pretty much consistent between versions - I'm concentrating now on making the pod easier to understand, developing a hopfield subclass, and developing a PDL subclass for very fast backprop.
+I expect this to carry on developing as I get closer to writing my PhD proposal - next is probably better Hopfield support, and maybe BPTT.
 
-Charles Colbourn
-March 2005
+If you don't care about the theory and just want to use 'a neural net', you'll probably want AI::NNFlex::Backprop.
+
+If you do care about the theory (and don't want to shell out for both volumes of 'Parallel Distributed Processing'), you could do worse than Phil Pictons 'Neural Networks' (Palgrave Grassroots series).
+
+
+Charles Colbourn April 2005
 
 ###################################################################
 Example XOR neural net (from examples/xor.pl

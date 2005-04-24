@@ -9,3 +9,4 @@ read & write methods for both networks and datasets modelled on snns format (for
 
 Implement an error method in addition to dbug, and clean up the dbug & error calls
 
+

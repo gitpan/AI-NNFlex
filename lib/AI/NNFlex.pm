@@ -58,9 +58,8 @@ use vars qw ($VERSION);
 #					put math functions in mathlib, etc etc
 #
 # 0.22 20050317		CColbourn	Implemented ::connect method
-#                                       dataset loading and saving, some
-#					improvements to the dataset syntax
 #
+# 0.23 20050424		CColbourn	Included Hopfield module in dist.
 #
 ###############################################################################
 # ToDo
@@ -77,7 +76,7 @@ use vars qw ($VERSION);
 # Clean up the perldocs
 #
 ###############################################################################
-$VERSION = "0.22";
+$VERSION = "0.23";
 
 
 ###############################################################################
@@ -1077,6 +1076,8 @@ v0.20 changes AI::NNFlex to be a base class, and ships three different network t
 v0.21 cleans up the perldocs more, and makes nnflex more distinctly a base module. There are quite a number of changes in Backprop in the v0.21 distribution.
 
 v0.22 introduces the ::connect method, to allow creation of recurrent connections, and manual control over connections between nodes/layers.
+
+v0.23 includes a Hopfield module in the distribution.
 
 =head1 COPYRIGHT
 

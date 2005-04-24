@@ -1,3 +1,14 @@
+0.23
+20050424
+
+changed sigmoid to sigmoid2 in mathlib - this is a sigmoid
+function generally used in BPTT, which isn't yet implemented.
+
+Replaced with a more standard 1/1+exp(1)**-x function.
+
+Implemented Hopfield module.
+
+###########################################################
 0.22
 XXXXXXXXX
 
@@ -17,9 +28,10 @@ version.
 Altered feedforward run method to return output pattern - more
 intuitive that way.
 
-There may be traces of hopfield here and there. Its WIP, but
-I pulled it from this release, as I was having trouble getting
-it to work but wanted to get the various fixes released.
+Implemented a Hopfield module. This is very much the first cut
+at this, since I've never really used hopfield nets before, and
+haven't put any debug in etc, until I've rethought the whole
+approach to debug in this set of code.
 
 Implemented dataset->delete method.
 

@@ -1,3 +1,7 @@
+Note: the dependency upon Math::Matrix is for the
+Hopfield module only. If you want to use Backprop
+you can safely leave it unresolved.
+
 If you want to perform a standard install, placing
 the modules etc in the perl standard library locations,
 run:
