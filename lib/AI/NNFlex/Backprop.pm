@@ -65,12 +65,13 @@ sub calc_error
 	{	
 		my $value = $_->{'activation'} - $outputPattern[$counter];
 
+
 		if ($_->{'errorfunction'})
 		{
 			my $errorfunction = $_->{'errorfunction'};
 			$value = $network->$errorfunction($value);
 		}
-
+		
 		$_->{'error'} = $value;
 		$counter++;
 		if (scalar @debug > 0)
@@ -194,6 +195,7 @@ sub hiddenOrInputToHidden
 				$nodeError += ($connectedNode->{'error'}) * ($connectedNode->{'connectedNodesWest'}->{'weights'}->[$connectedNodeCounter]);
 				$connectedNodeCounter++;
 			}
+
 			if (scalar @debug > 0)
 			{$network->dbug("Hidden node $node error = $nodeError",4);}
 

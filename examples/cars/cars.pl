@@ -122,7 +122,6 @@ my $dataset = AI::NNFlex::Dataset->new(\@dataArray);
 
 my $network = AI::NNFlex::Backprop->new( learningrate=>.1,
 				fahlmanconstant=>0.1,
-				errorfunction=>"atanh",
 				bias=>1,
 				momentum=>0.6);
 

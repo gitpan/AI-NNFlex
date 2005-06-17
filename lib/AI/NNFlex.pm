@@ -61,6 +61,10 @@ use vars qw ($VERSION);
 #
 # 0.23 20050424		CColbourn	Included Hopfield module in dist.
 #
+# 0.24 20050620		CColbourn	Corrected a bug in the bias weight
+#					calculation
+#
+#
 ###############################################################################
 # ToDo
 # ====
@@ -76,7 +80,7 @@ use vars qw ($VERSION);
 # Clean up the perldocs
 #
 ###############################################################################
-$VERSION = "0.23";
+$VERSION = "0.24";
 
 
 ###############################################################################
@@ -350,15 +354,8 @@ sub init
 			foreach my $node (@{$layer->{'nodes'}})
 			{
 				push @{$node->{'connectedNodesWest'}->{'nodes'}},$network->{'biasnode'};
-				my $weight;
-				if ($network->{'randomweights'})
-				{
-					$weight = rand(1);
-				}
-				else
-				{
-					$weight = 0;
-				}
+				my $weight = $network->calcweight;
+
 				push @{$node->{'connectedNodesWest'}->{'weights'}},$weight;
 				if (scalar @debug > 0)
 				{$network->dbug ("West to east Connection - bias to ".$node->{'nodeid'}." weight = $weight",2);}
@@ -1078,6 +1075,8 @@ v0.21 cleans up the perldocs more, and makes nnflex more distinctly a base modul
 v0.22 introduces the ::connect method, to allow creation of recurrent connections, and manual control over connections between nodes/layers.
 
 v0.23 includes a Hopfield module in the distribution.
+
+v0.24 fixes a bug in the bias weight calculations
 
 =head1 COPYRIGHT
 

@@ -1,3 +1,11 @@
+0.24
+20050620
+
+Fixed a bug in the implementation of bias weights. Implemented
+the addition example.
+
+##########################################################
+
 0.23
 20050424
 

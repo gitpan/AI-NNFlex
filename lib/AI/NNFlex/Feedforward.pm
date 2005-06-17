@@ -139,7 +139,7 @@ sub run
 			foreach my $connectedNode (@{$node->{'connectedNodesWest'}->{'nodes'}})
 			{
 				if (scalar @debug> 0)
-				{$network->dbug("Flowing from $connectedNode to $node",3);}
+				{$network->dbug("Flowing from ".$connectedNode->{'nodeid'}." to ".$node->{'nodeid'},3);}
 	
 				my $weight = ${$node->{'connectedNodesWest'}->{'weights'}}[$nodeCounter];
 				my $activation = $connectedNode->{'activation'};		
@@ -163,7 +163,7 @@ sub run
 				$node->{'activation'} = $value;
 			}
 			if (scalar @debug> 0)
-			{$network->dbug("Final activation of $node = ".$node->{'activation'},3);}
+			{$network->dbug("Final activation of ".$node->{'nodeid'}." = ".$node->{'activation'},3);}
 		}
 	}
 
